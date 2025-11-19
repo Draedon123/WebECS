@@ -1,5 +1,1 @@
-function helloWorld(): void {
-  console.log("Hello, World!");
-}
-
-export { helloWorld };
+export * from "./ecs";
