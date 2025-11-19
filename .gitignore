@@ -1,0 +1,5 @@
+node_modules
+.vscode/*
+todo.md
+.npmrc
+web-build
