@@ -16,6 +16,14 @@ class Vector3 {
     return this;
   }
 
+  public scale(factor: number): this {
+    this.x *= factor;
+    this.y *= factor;
+    this.z *= factor;
+
+    return this;
+  }
+
   public get x(): number {
     return this.components[0];
   }
