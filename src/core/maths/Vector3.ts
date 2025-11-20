@@ -4,6 +4,12 @@ class Vector3 {
     this.components = new Float32Array([x, y, z]);
   }
 
+  *[Symbol.iterator]() {
+    yield this.x;
+    yield this.y;
+    yield this.z;
+  }
+
   public static add(a: Vector3, b: Vector3): Vector3 {
     return new Vector3(a.x + b.x, a.y + b.y, a.z + b.z);
   }
