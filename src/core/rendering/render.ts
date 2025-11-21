@@ -22,7 +22,7 @@ function render(
     queries: [
       {
         type: "intersection",
-        components: [MeshReference, TextureReference],
+        components: [MeshReference],
       },
       {
         type: "union",
@@ -49,12 +49,14 @@ function render(
     const textureReference = entityManager.getComponent<TextureReference>(
       entity,
       "TextureReference"
-    ) as TextureReference;
+    );
 
-    const texture = resourceManager.getTexture(textureReference.textureKey);
+    const textureKey =
+      textureReference?.textureKey ?? ResourceManager.DEFAULT_TEXTURE_KEY;
+    const texture = resourceManager.getTexture(textureKey);
 
     if (texture === null) {
-      console.error(`No texture found with key ${textureReference.textureKey}`);
+      console.error(`No texture found with key ${textureKey}`);
       return;
     }
 

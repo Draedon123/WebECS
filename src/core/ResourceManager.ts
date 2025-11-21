@@ -1,5 +1,5 @@
 import type { IndexArray, VertexArray } from "./meshes";
-import type { Renderer, Texture } from "./rendering";
+import { Texture, type Renderer } from "./rendering";
 
 type TextureEntry = {
   texture: Texture;
@@ -12,6 +12,8 @@ type MeshEntry = {
 };
 
 class ResourceManager {
+  public static readonly DEFAULT_TEXTURE_KEY: string = "default";
+
   private readonly textures: Record<string, TextureEntry>;
   private readonly meshes: Record<string, MeshEntry>;
 
@@ -42,6 +44,10 @@ class ResourceManager {
       size: actualByteLength * maxObjects,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
+
+    const defaultTexture = Texture.colour(255, 255, 255);
+    defaultTexture.initialise(device);
+    this.addTexture(ResourceManager.DEFAULT_TEXTURE_KEY, defaultTexture);
   }
 
   public addTexture(key: string, texture: Texture): void {
