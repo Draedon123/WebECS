@@ -18,7 +18,7 @@ type MultiQuery = {
 };
 
 class EntityManager {
-  private static instance: EntityManager | null;
+  private static instance: EntityManager | null = null;
 
   private readonly entityComponentMap: Map<Entity, Component[]>;
   private readonly componentEntityMap: Map<string, Entity[]>;
