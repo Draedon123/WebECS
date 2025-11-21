@@ -44,14 +44,18 @@ class PerspectiveCamera extends Component {
     this.fovDegrees = toDegrees(radians);
   }
 
-  public calculateViewMatrix(): Matrix4 {
-    const modelMatrix = calculateModelMatrix(this);
+  public calculatePerspectiveViewMatrix(): Matrix4 {
     const perspectiveMatrix = this.calculatePerspectiveMatrix();
-    const viewMatrix = modelMatrix.invert();
+    const viewMatrix = this.calculateViewMatrix();
 
     Matrix4.multiplyMatrices(viewMatrix, perspectiveMatrix, viewMatrix);
 
     return viewMatrix;
+  }
+
+  private calculateViewMatrix(): Matrix4 {
+    const modelMatrix = calculateModelMatrix(this);
+    return modelMatrix.invert();
   }
 
   private calculatePerspectiveMatrix(): Matrix4 {
