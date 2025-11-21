@@ -1,8 +1,8 @@
-import type { Vector3 } from "../maths";
+import type { Vector2, Vector3 } from "../maths";
 
 type Vertex = {
   position: Vector3;
-  uv: [number, number];
+  uv: Vector2;
   normal: Vector3;
 };
 
