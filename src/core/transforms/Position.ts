@@ -19,6 +19,30 @@ class Position {
 
     this.position.add(translation);
   }
+
+  public get x(): number {
+    return this.position.x;
+  }
+
+  public get y(): number {
+    return this.position.y;
+  }
+
+  public get z(): number {
+    return this.position.z;
+  }
+
+  public set x(x: number) {
+    this.position.x = x;
+  }
+
+  public set y(y: number) {
+    this.position.y = y;
+  }
+
+  public set z(z: number) {
+    this.position.z = z;
+  }
 }
 
 export { Position };
