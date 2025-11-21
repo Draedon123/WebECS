@@ -12,7 +12,6 @@ class VertexArray extends Component {
 
   public readonly label: string;
   public vertexBuffer!: GPUBuffer;
-  private initialised: boolean;
   private readonly rawVertices: Vertex[];
 
   constructor(vertices: Vertex[], label: string = "") {
@@ -20,8 +19,10 @@ class VertexArray extends Component {
 
     this.rawVertices = vertices;
     this.label = label;
+  }
 
-    this.initialised = false;
+  public get initialised(): boolean {
+    return this.vertexBuffer !== undefined;
   }
 
   public initialise(device: GPUDevice): void {
@@ -42,8 +43,6 @@ class VertexArray extends Component {
     });
 
     device.queue.writeBuffer(this.vertexBuffer, 0, vertices);
-
-    this.initialised = true;
   }
 
   public get vertexCount(): number {
