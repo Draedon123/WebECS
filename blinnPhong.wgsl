@@ -10,22 +10,30 @@ struct VertexOutput {
   @location(1) normal: vec3f,
 }
 
+struct ObjectTransforms {
+  modelMatrix: mat4x4f,
+  normalMatrix: mat3x3f,
+}
+
 @group(0) @binding(0) var <uniform> perspectiveViewMatrix: mat4x4f; 
 
-@group(1) @binding(0) var <uniform> modelMatrix: mat4x4f;
+@group(1) @binding(0) var <uniform> objectTransforms: ObjectTransforms;
+
+const LIGHT_DIRECTION: vec3f = normalize(vec3f(1.0, 1.0, 1.0));
 
 @vertex
 fn vertexMain(vertex: Vertex) -> VertexOutput {
   var output: VertexOutput;
 
-  output.position = perspectiveViewMatrix * modelMatrix * vec4f(vertex.position, 1.0);
+  output.position = perspectiveViewMatrix * objectTransforms.modelMatrix * vec4f(vertex.position, 1.0);
   output.uv = vertex.uv;
-  output.normal = vertex.normal;
+  output.normal = normalize(objectTransforms.normalMatrix * vertex.normal);
 
   return output;
 }
 
 @fragment
 fn fragmentMain(input: VertexOutput) -> @location(0) vec4f {
-  return vec4f(1.0);
+  return vec4f(1.0) * max(0.0, dot(input.normal, LIGHT_DIRECTION));
+  // return vec4f(input.normal, 1.0);
 }
