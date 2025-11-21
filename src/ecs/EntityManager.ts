@@ -173,4 +173,4 @@ function intersection<T>(array: T[][]): T[] {
   );
 }
 
-export { EntityManager };
+export { EntityManager, type Entity };

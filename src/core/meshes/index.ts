@@ -1,4 +1,4 @@
 export * from "./VertexArray";
 export * from "./IndexArray";
-export * from "./render";
+export * from "../rendering/render";
 export * from "./createCubeMesh";

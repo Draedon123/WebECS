@@ -8,9 +8,6 @@ type PerspectiveCameraOptions = {
   near: number;
   far: number;
   aspectRatio: number;
-
-  position: Position;
-  rotation: Rotation;
 };
 
 class PerspectiveCamera extends Component {
@@ -21,9 +18,6 @@ class PerspectiveCamera extends Component {
   public far: number;
   public aspectRatio: number;
 
-  public position: Position;
-  public rotation: Rotation;
-
   constructor(options: Partial<PerspectiveCameraOptions>) {
     super(PerspectiveCamera.tag);
 
@@ -31,9 +25,6 @@ class PerspectiveCamera extends Component {
     this.near = options.near ?? 1e-3;
     this.far = options.far ?? 1e3;
     this.aspectRatio = options.aspectRatio ?? 16 / 9;
-
-    this.position = options.position ?? new Position();
-    this.rotation = options.rotation ?? new Rotation();
   }
 
   public get fovRadians(): number {
@@ -44,17 +35,20 @@ class PerspectiveCamera extends Component {
     this.fovDegrees = toDegrees(radians);
   }
 
-  public calculatePerspectiveViewMatrix(): Matrix4 {
+  public calculatePerspectiveViewMatrix(
+    position: Position,
+    rotation: Rotation
+  ): Matrix4 {
     const perspectiveMatrix = this.calculatePerspectiveMatrix();
-    const viewMatrix = this.calculateViewMatrix();
+    const viewMatrix = this.calculateViewMatrix(position, rotation);
 
     Matrix4.multiplyMatrices(viewMatrix, perspectiveMatrix, viewMatrix);
 
     return viewMatrix;
   }
 
-  private calculateViewMatrix(): Matrix4 {
-    const modelMatrix = calculateModelMatrix(this);
+  private calculateViewMatrix(position: Position, rotation: Rotation): Matrix4 {
+    const modelMatrix = calculateModelMatrix({ position, rotation });
     return modelMatrix.invert();
   }
 

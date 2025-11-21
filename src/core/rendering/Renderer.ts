@@ -1,3 +1,9 @@
+import { EntityManager, type Entity } from "src/ecs";
+import { Shader } from "./Shader";
+import { Position, Rotation } from "../transforms";
+import { PerspectiveCamera } from "../cameras/PerspectiveCamera";
+import { render } from "../meshes";
+
 type RendererSettings = {
   clearColour: GPUColor;
 };
@@ -11,7 +17,10 @@ class Renderer {
   private readonly ctx: GPUCanvasContext;
   private readonly canvasFormat: GPUTextureFormat;
 
-  private bindGroup!: GPUBindGroup;
+  private bindGroup0!: GPUBindGroup;
+
+  public readonly modelMatrixBindGroupLayout: GPUBindGroupLayout;
+  private readonly perspectiveViewMatrixBuffer: GPUBuffer;
 
   private constructor(
     canvas: HTMLCanvasElement,
@@ -31,6 +40,23 @@ class Renderer {
     this.settings = {
       clearColour: settings.clearColour ?? [0, 0, 0, 1],
     };
+
+    this.perspectiveViewMatrixBuffer = device.createBuffer({
+      label: "Perspective View Matrix Buffer",
+      size: 16 * 4,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+
+    this.modelMatrixBindGroupLayout = this.device.createBindGroupLayout({
+      label: "Renderer Bind Group Layout 1",
+      entries: [
+        {
+          binding: 0,
+          buffer: { type: "uniform" },
+          visibility: GPUShaderStage.VERTEX,
+        },
+      ],
+    });
   }
 
   public async initialise(): Promise<void> {
@@ -42,8 +68,6 @@ class Renderer {
 
       this.canvas.width = width;
       this.canvas.height = height;
-
-      this.render();
     }).observe(this.canvas);
 
     await this.initialiseRendering();
@@ -55,13 +79,33 @@ class Renderer {
       format: this.canvasFormat,
     });
 
-    const bindGroupLayout = this.device.createBindGroupLayout({
-      label: "Renderer Bind Group Layout",
-      entries: [],
+    const shader = await Shader.fetch(import.meta.env.BASE_URL + "flat.wgsl");
+    shader.initialise(this.device);
+
+    const bindGroup0Layout = this.device.createBindGroupLayout({
+      label: "Renderer Bind Group Layout 0",
+      entries: [
+        {
+          binding: 0,
+          buffer: { type: "uniform" },
+          visibility: GPUShaderStage.VERTEX,
+        },
+      ],
+    });
+
+    this.bindGroup0 = this.device.createBindGroup({
+      label: "Renderer Bind Group 0",
+      layout: bindGroup0Layout,
+      entries: [
+        {
+          binding: 0,
+          resource: { buffer: this.perspectiveViewMatrixBuffer },
+        },
+      ],
     });
   }
 
-  public render(): void {
+  public render(camera: Entity): void {
     const encoder = this.device.createCommandEncoder();
     const renderPass = encoder.beginRenderPass({
       colorAttachments: [
@@ -73,6 +117,50 @@ class Renderer {
         },
       ],
     });
+
+    const entityManager = EntityManager.getInstance();
+    const cameraPosition = entityManager.getComponent<Position>(
+      camera,
+      "Position"
+    );
+    const cameraRotation = entityManager.getComponent<Rotation>(
+      camera,
+      "Rotation"
+    );
+    const cameraComponent = entityManager.getComponent<PerspectiveCamera>(
+      camera,
+      "PerspectiveCamera"
+    );
+
+    if (cameraComponent === null) {
+      console.error("No camera found");
+      return;
+    }
+
+    if (cameraPosition === null) {
+      console.error("Camera does not have position component");
+      return;
+    }
+
+    if (cameraRotation === null) {
+      console.error("Camera does not have rotation component");
+      return;
+    }
+
+    const perspectiveMatrix = cameraComponent.calculatePerspectiveViewMatrix(
+      cameraPosition,
+      cameraRotation
+    );
+
+    this.device.queue.writeBuffer(
+      this.perspectiveViewMatrixBuffer,
+      0,
+      perspectiveMatrix.components.buffer
+    );
+
+    renderPass.setBindGroup(0, this.bindGroup0);
+
+    render(this.device, renderPass);
 
     renderPass.end();
     this.device.queue.submit([encoder.finish(renderPass)]);
