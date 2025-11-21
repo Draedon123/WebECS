@@ -3,7 +3,7 @@ import { IndexArray } from "./IndexArray";
 import { VertexArray } from "./VertexArray";
 import { Position, Rotation, Scale } from "../transforms";
 
-function render(renderPass: GPURenderPassEncoder): void {
+function render(device: GPUDevice, renderPass: GPURenderPassEncoder): void {
   const entityManager = EntityManager.getInstance();
   const renderables = entityManager.queryMultiple({
     type: "intersection",
@@ -29,9 +29,17 @@ function render(renderPass: GPURenderPassEncoder): void {
       "IndexArray"
     );
 
+    if (!vertexArray.initialised) {
+      vertexArray.initialise(device);
+    }
+
     renderPass.setVertexBuffer(0, vertexArray.vertexBuffer);
 
     if (indexArray !== null) {
+      if (!indexArray.initialised) {
+        indexArray.initialise(device);
+      }
+
       renderPass.setIndexBuffer(indexArray.indexBuffer, indexArray.indexFormat);
       renderPass.drawIndexed(indexArray.indexCount, 1);
     } else {
