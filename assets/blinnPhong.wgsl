@@ -14,6 +14,8 @@ struct VertexOutput {
 
 @group(1) @binding(0) var <uniform> modelMatrix: mat4x4f;
 
+const LIGHT_DIRECTION: vec3f = normalize(vec3f(0.0, 1.0, 1.0));
+
 @vertex
 fn vertexMain(vertex: Vertex) -> VertexOutput {
   var output: VertexOutput;
@@ -27,5 +29,5 @@ fn vertexMain(vertex: Vertex) -> VertexOutput {
 
 @fragment
 fn fragmentMain(input: VertexOutput) -> @location(0) vec4f {
-  return vec4f(1.0);
+  return vec4f(1.0) * max(0.0, dot(input.normal, LIGHT_DIRECTION));
 }

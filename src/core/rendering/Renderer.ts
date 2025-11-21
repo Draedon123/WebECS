@@ -80,7 +80,9 @@ class Renderer {
       format: this.canvasFormat,
     });
 
-    const shader = await Shader.fetch(import.meta.env.BASE_URL + "/flat.wgsl");
+    const shader = await Shader.fetch(
+      import.meta.env.BASE_URL + "/blinnPhong.wgsl"
+    );
     shader.initialise(this.device);
 
     const bindGroup0Layout = this.device.createBindGroupLayout({
@@ -147,6 +149,9 @@ class Renderer {
             format: this.canvasFormat,
           },
         ],
+      },
+      primitive: {
+        cullMode: "back",
       },
     });
   }

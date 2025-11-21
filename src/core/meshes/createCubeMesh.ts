@@ -34,194 +34,194 @@ function createCubeMesh(sideLength: number = 1): Vertex[] {
   const vertices: Vertex[] = [
     //#region Front
     {
-      position: POSITIONS.NPN,
+      position: POSITIONS.NPP,
       uv: UVS.UL,
       normal: NORMALS.FRONT,
     },
     {
-      position: POSITIONS.NNN,
+      position: POSITIONS.NNP,
       uv: UVS.BL,
       normal: NORMALS.FRONT,
     },
     {
-      position: POSITIONS.PPN,
+      position: POSITIONS.PPP,
       uv: UVS.UR,
       normal: NORMALS.FRONT,
     },
     {
-      position: POSITIONS.PPN,
+      position: POSITIONS.PPP,
       uv: UVS.UR,
       normal: NORMALS.FRONT,
     },
     {
-      position: POSITIONS.NNN,
+      position: POSITIONS.NNP,
       uv: UVS.BL,
       normal: NORMALS.FRONT,
     },
     {
-      position: POSITIONS.PNN,
+      position: POSITIONS.PNP,
       uv: UVS.BR,
       normal: NORMALS.FRONT,
     },
     //#endregion
     //#region Back
     {
-      position: POSITIONS.PPP,
+      position: POSITIONS.PPN,
       uv: UVS.UL,
       normal: NORMALS.BACK,
     },
     {
-      position: POSITIONS.PNP,
+      position: POSITIONS.PNN,
       uv: UVS.BL,
       normal: NORMALS.BACK,
     },
     {
-      position: POSITIONS.NPP,
+      position: POSITIONS.NPN,
       uv: UVS.UR,
       normal: NORMALS.BACK,
     },
     {
-      position: POSITIONS.NPP,
+      position: POSITIONS.NPN,
       uv: UVS.UR,
       normal: NORMALS.BACK,
     },
     {
-      position: POSITIONS.PNP,
+      position: POSITIONS.PNN,
       uv: UVS.BL,
       normal: NORMALS.BACK,
     },
     {
-      position: POSITIONS.NNP,
+      position: POSITIONS.NNN,
       uv: UVS.BR,
       normal: NORMALS.BACK,
     },
     //#endregion
     //#region Left
     {
-      position: POSITIONS.NPP,
+      position: POSITIONS.NPN,
       uv: UVS.UL,
       normal: NORMALS.LEFT,
     },
     {
-      position: POSITIONS.NNP,
+      position: POSITIONS.NNN,
       uv: UVS.BL,
       normal: NORMALS.LEFT,
     },
     {
-      position: POSITIONS.NPN,
+      position: POSITIONS.NPP,
       uv: UVS.UR,
       normal: NORMALS.LEFT,
     },
     {
-      position: POSITIONS.NPN,
+      position: POSITIONS.NPP,
       uv: UVS.UR,
-      normal: NORMALS.LEFT,
-    },
-    {
-      position: POSITIONS.NNP,
-      uv: UVS.BL,
       normal: NORMALS.LEFT,
     },
     {
       position: POSITIONS.NNN,
+      uv: UVS.BL,
+      normal: NORMALS.LEFT,
+    },
+    {
+      position: POSITIONS.NNP,
       uv: UVS.BR,
       normal: NORMALS.LEFT,
     },
     //#endregion
     //#region Right
     {
-      position: POSITIONS.PPN,
+      position: POSITIONS.PPP,
       uv: UVS.UL,
       normal: NORMALS.RIGHT,
     },
     {
-      position: POSITIONS.PNN,
+      position: POSITIONS.PNP,
       uv: UVS.BL,
       normal: NORMALS.RIGHT,
     },
     {
-      position: POSITIONS.PPP,
+      position: POSITIONS.PPN,
       uv: UVS.UR,
       normal: NORMALS.RIGHT,
     },
     {
-      position: POSITIONS.PPP,
+      position: POSITIONS.PPN,
       uv: UVS.UR,
-      normal: NORMALS.RIGHT,
-    },
-    {
-      position: POSITIONS.PNN,
-      uv: UVS.BL,
       normal: NORMALS.RIGHT,
     },
     {
       position: POSITIONS.PNP,
+      uv: UVS.BL,
+      normal: NORMALS.RIGHT,
+    },
+    {
+      position: POSITIONS.PNN,
       uv: UVS.BR,
       normal: NORMALS.RIGHT,
     },
     //#endregion
     //#region Top
     {
-      position: POSITIONS.NPP,
+      position: POSITIONS.NPN,
       uv: UVS.UL,
       normal: NORMALS.TOP,
     },
     {
-      position: POSITIONS.NPN,
-      uv: UVS.BL,
-      normal: NORMALS.TOP,
-    },
-    {
-      position: POSITIONS.PPP,
-      uv: UVS.UR,
-      normal: NORMALS.TOP,
-    },
-    {
-      position: POSITIONS.PPP,
-      uv: UVS.UR,
-      normal: NORMALS.TOP,
-    },
-    {
-      position: POSITIONS.NPN,
+      position: POSITIONS.NPP,
       uv: UVS.BL,
       normal: NORMALS.TOP,
     },
     {
       position: POSITIONS.PPN,
+      uv: UVS.UR,
+      normal: NORMALS.TOP,
+    },
+    {
+      position: POSITIONS.PPN,
+      uv: UVS.UR,
+      normal: NORMALS.TOP,
+    },
+    {
+      position: POSITIONS.NPP,
+      uv: UVS.BL,
+      normal: NORMALS.TOP,
+    },
+    {
+      position: POSITIONS.PPP,
       uv: UVS.BR,
       normal: NORMALS.TOP,
     },
     //#endregion
     //#region Bottom
     {
-      position: POSITIONS.NNN,
+      position: POSITIONS.NNP,
       uv: UVS.UL,
-      normal: NORMALS.TOP,
+      normal: NORMALS.BOTTOM,
     },
     {
-      position: POSITIONS.NNP,
+      position: POSITIONS.NNN,
       uv: UVS.BL,
-      normal: NORMALS.TOP,
-    },
-    {
-      position: POSITIONS.PNN,
-      uv: UVS.UR,
-      normal: NORMALS.TOP,
-    },
-    {
-      position: POSITIONS.PNN,
-      uv: UVS.UR,
-      normal: NORMALS.TOP,
-    },
-    {
-      position: POSITIONS.NNP,
-      uv: UVS.BL,
-      normal: NORMALS.TOP,
+      normal: NORMALS.BOTTOM,
     },
     {
       position: POSITIONS.PNP,
+      uv: UVS.UR,
+      normal: NORMALS.BOTTOM,
+    },
+    {
+      position: POSITIONS.PNP,
+      uv: UVS.UR,
+      normal: NORMALS.BOTTOM,
+    },
+    {
+      position: POSITIONS.NNN,
+      uv: UVS.BL,
+      normal: NORMALS.BOTTOM,
+    },
+    {
+      position: POSITIONS.PNN,
       uv: UVS.BR,
-      normal: NORMALS.TOP,
+      normal: NORMALS.BOTTOM,
     },
     //#endregion
   ];

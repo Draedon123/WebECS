@@ -1,6 +1,6 @@
 import { Component } from "src/ecs";
-import { Matrix4, Quaternion, toDegrees, toRadians, Vector3 } from "../maths";
-import { Position, Rotation } from "../transforms";
+import { Matrix4, toDegrees, toRadians } from "../maths";
+import { calculateModelMatrix, Position, Rotation } from "../transforms";
 
 type PerspectiveCameraOptions = {
   /** degrees */
@@ -48,14 +48,7 @@ class PerspectiveCamera extends Component {
   }
 
   private calculateViewMatrix(position: Position, rotation: Rotation): Matrix4 {
-    const inverted = Quaternion.invert(rotation.quaternion);
-    const forward = new Vector3(inverted.y, inverted.z, inverted.w);
-
-    return Matrix4.lookAt(
-      position.position,
-      forward.add(position.position),
-      new Vector3(0, 1, 0)
-    );
+    return calculateModelMatrix({ position, rotation }).invert();
   }
 
   private calculatePerspectiveMatrix(): Matrix4 {

@@ -23,7 +23,7 @@ async function main(): Promise<void> {
   const cameraComponent = new PerspectiveCamera({});
   entityManager.addComponent(camera, cameraComponent);
   entityManager.addComponent(camera, new Position());
-  entityManager.addComponent(camera, new Rotation(0, 45, 0));
+  entityManager.addComponent(camera, new Rotation(0, 0, 0));
 
   const cubeMesh = createCubeMesh();
   const cube = entityManager.createEntity();
@@ -49,16 +49,16 @@ async function main(): Promise<void> {
       ],
     })
   );
-  entityManager.addComponent(cube, new Position(0, 0, 10));
+  entityManager.addComponent(cube, new Position(0, -1, -10));
   entityManager.addComponent(cube, cubeRotation);
   entityManager.addComponent(cube, new Scale(2));
 
   function render() {
     cameraComponent.aspectRatio = canvas.width / canvas.height;
 
-    cubeRotation.rotateX(0.1);
-    cubeRotation.rotateY(0.1);
-    cubeRotation.rotateZ(0.1);
+    cubeRotation.rotateX(0.3);
+    cubeRotation.rotateY(0.2);
+    cubeRotation.rotateZ(0.4);
 
     renderer.render(camera);
     requestAnimationFrame(render);
