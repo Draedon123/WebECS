@@ -3,9 +3,9 @@ import { Vector3 } from "../maths/Vector3";
 class Scale {
   public scale: Vector3;
 
-  constructor(scale: Vector3 | number);
+  constructor(scale?: Vector3 | number);
   constructor(x: number, y: number, z: number);
-  constructor(scale: number | Vector3, y?: number, z?: number) {
+  constructor(scale: number | Vector3 = 1, y?: number, z?: number) {
     if (typeof scale === "number") {
       if (y !== undefined) {
         scale = new Vector3(scale, y, z as number);
