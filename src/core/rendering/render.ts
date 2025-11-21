@@ -9,6 +9,7 @@ import {
 import { BufferWriter } from "../gpu";
 import { ResourceManager } from "../ResourceManager";
 import { MeshReference } from "../meshes/MeshReference";
+import { TextureReference } from "./TextureReference";
 
 function render(
   resourceManager: ResourceManager,
@@ -21,7 +22,7 @@ function render(
     queries: [
       {
         type: "intersection",
-        components: [MeshReference],
+        components: [MeshReference, TextureReference],
       },
       {
         type: "union",
@@ -30,7 +31,9 @@ function render(
     ],
   });
 
-  for (const entity of renderables) {
+  for (let i = 0; i < renderables.length; i++) {
+    const entity = renderables[i];
+
     const meshReference = entityManager.getComponent<MeshReference>(
       entity,
       "MeshReference"
@@ -43,7 +46,17 @@ function render(
       return;
     }
 
-    const object = resourceManager.getObject(entity);
+    const textureReference = entityManager.getComponent<TextureReference>(
+      entity,
+      "TextureReference"
+    ) as TextureReference;
+
+    const texture = resourceManager.getTexture(textureReference.textureKey);
+
+    if (texture === null) {
+      console.error(`No texture found with key ${textureReference.textureKey}`);
+      return;
+    }
 
     const position =
       entityManager.getComponent<Position>(entity, "Position") ?? undefined;
@@ -52,22 +65,32 @@ function render(
     const scale =
       entityManager.getComponent<Scale>(entity, "Scale") ?? undefined;
 
-    if (object === null) {
-      console.error(`Object ${entity} not registered`);
-      return;
-    }
-
-    const bufferWriter = new BufferWriter((16 + 12) * 4);
+    const bufferWriter = new BufferWriter(
+      resourceManager.transformByteLength,
+      undefined,
+      0
+    );
     const modelMatrix = calculateModelMatrix({ position, rotation, scale });
     const normalMatrix = calculateNormalMatrix({ position, rotation, scale });
 
     bufferWriter.writeMat4x4f(modelMatrix);
     bufferWriter.writeMat3x3f(normalMatrix);
 
-    device.queue.writeBuffer(object.transformBuffer, 0, bufferWriter.buffer);
+    const bufferOffset =
+      i *
+      (resourceManager.transformByteLength + resourceManager.transformsPadding);
+    device.queue.writeBuffer(
+      resourceManager.transformsBuffer,
+      bufferOffset,
+      bufferWriter.buffer
+    );
 
     renderPass.setVertexBuffer(0, mesh.vertices.vertexBuffer);
-    renderPass.setBindGroup(1, object.bindGroup);
+    renderPass.setBindGroup(1, texture.bindGroup, [
+      i *
+        (resourceManager.transformByteLength +
+          resourceManager.transformsPadding),
+    ]);
 
     if (mesh.indices !== undefined) {
       if (!mesh.indices.initialised) {

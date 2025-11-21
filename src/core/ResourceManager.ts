@@ -1,9 +1,9 @@
-import type { Entity } from "src/ecs";
 import type { IndexArray, VertexArray } from "./meshes";
 import type { Renderer, Texture } from "./rendering";
 
 type TextureEntry = {
   texture: Texture;
+  bindGroup: GPUBindGroup;
 };
 
 type MeshEntry = {
@@ -11,35 +11,65 @@ type MeshEntry = {
   indices?: IndexArray;
 };
 
-type ObjectData = {
-  bindGroup: GPUBindGroup;
-  transformBuffer: GPUBuffer;
-};
-
 class ResourceManager {
   private readonly textures: Record<string, TextureEntry>;
   private readonly meshes: Record<string, MeshEntry>;
 
-  private readonly objectData: Record<Entity, ObjectData>;
-
   private readonly renderer: Renderer;
   private readonly device: GPUDevice;
 
-  constructor(renderer: Renderer, device: GPUDevice) {
+  public readonly transformsBuffer: GPUBuffer;
+  public readonly transformByteLength: number;
+  public readonly transformsPadding: number;
+
+  constructor(renderer: Renderer, device: GPUDevice, maxObjects: number) {
     this.textures = {};
     this.meshes = {};
-    this.objectData = {};
 
     this.renderer = renderer;
     this.device = device;
+
+    this.transformByteLength = (16 + 12) * 4;
+    const actualByteLength =
+      this.transformByteLength +
+      device.limits.minUniformBufferOffsetAlignment -
+      (this.transformByteLength %
+        device.limits.minUniformBufferOffsetAlignment);
+    this.transformsPadding = actualByteLength - this.transformByteLength;
+
+    this.transformsBuffer = device.createBuffer({
+      label: "Transforms Buffer",
+      size: actualByteLength * maxObjects,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
   }
 
-  public addTexture(key: string, texture: TextureEntry): void {
+  public addTexture(key: string, texture: Texture): void {
     if (key in this.textures) {
       this.textures[key].texture?.texture.destroy();
     }
 
-    this.textures[key] = texture;
+    texture.initialise(this.device);
+
+    this.textures[key] = {
+      texture,
+      bindGroup: this.device.createBindGroup({
+        layout: this.renderer.perObjectBindGroupLayout,
+        entries: [
+          {
+            binding: 0,
+            resource: {
+              buffer: this.transformsBuffer,
+              size: this.transformByteLength + this.transformsPadding,
+            },
+          },
+          {
+            binding: 1,
+            resource: texture.texture.createView(),
+          },
+        ],
+      }),
+    };
   }
 
   public getTexture(key: string): TextureEntry | null {
@@ -59,49 +89,6 @@ class ResourceManager {
 
   public getMesh(key: string): MeshEntry | null {
     return this.meshes[key] ?? null;
-  }
-
-  public addObject(object: Entity, textureKey: string): void {
-    if (object in this.objectData) {
-      this.objectData[object].transformBuffer?.destroy();
-    }
-
-    const texture = this.getTexture(textureKey);
-
-    if (texture === null) {
-      console.error(`Could not find texture with key ${textureKey}`);
-      return;
-    }
-
-    texture.texture.initialise(this.device);
-
-    const transformBuffer = this.device.createBuffer({
-      size: (16 + 12) * 4,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
-
-    const bindGroup = this.device.createBindGroup({
-      layout: this.renderer.perObjectBindGroupLayout,
-      entries: [
-        {
-          binding: 0,
-          resource: transformBuffer,
-        },
-        {
-          binding: 1,
-          resource: texture.texture.texture.createView(),
-        },
-      ],
-    });
-
-    this.objectData[object] = {
-      transformBuffer,
-      bindGroup,
-    };
-  }
-
-  public getObject(object: Entity): ObjectData | null {
-    return this.objectData[object] ?? null;
   }
 }
 

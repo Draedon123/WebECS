@@ -42,7 +42,7 @@ class Renderer {
     this.device = device;
     this.ctx = ctx;
     this.canvasFormat = "rgba8unorm";
-    this.resourceManager = new ResourceManager(this, device);
+    this.resourceManager = new ResourceManager(this, device, 128);
     this.settings = {
       clearColour: settings.clearColour ?? [0, 0, 0, 1],
     };
@@ -58,7 +58,7 @@ class Renderer {
       entries: [
         {
           binding: 0,
-          buffer: { type: "uniform" },
+          buffer: { type: "uniform", hasDynamicOffset: true },
           visibility: GPUShaderStage.VERTEX,
         },
         {
