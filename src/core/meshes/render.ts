@@ -9,13 +9,12 @@ type IndexedMesh = UnindexedMesh & {
   indices: IndexArray;
 };
 
-function render(
-  mesh: UnindexedMesh | IndexedMesh,
-  renderPass: GPURenderPassEncoder
-): void {
+type Mesh = UnindexedMesh & Partial<IndexedMesh>;
+
+function render(mesh: Mesh, renderPass: GPURenderPassEncoder): void {
   renderPass.setVertexBuffer(0, mesh.vertices.vertexBuffer);
 
-  if ("indices" in mesh) {
+  if (mesh.indices !== undefined) {
     renderPass.setIndexBuffer(
       mesh.indices.indexBuffer,
       mesh.indices.indexFormat
@@ -26,4 +25,5 @@ function render(
   }
 }
 
-export { render, type UnindexedMesh, type IndexedMesh };
+export { render };
+export type { UnindexedMesh, IndexedMesh, Mesh };
