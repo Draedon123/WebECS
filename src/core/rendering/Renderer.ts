@@ -3,6 +3,7 @@ import { Shader } from "./Shader";
 import { Position, Rotation } from "../transforms";
 import { PerspectiveCamera } from "../cameras/PerspectiveCamera";
 import { render } from "./render";
+import { ResourceManager } from "../ResourceManager";
 
 type RendererSettings = {
   clearColour: GPUColor;
@@ -21,6 +22,7 @@ class Renderer {
   private renderPipeline!: GPURenderPipeline;
   private depthTexture!: GPUTexture;
 
+  public readonly resourceManager: ResourceManager;
   public readonly perObjectBindGroupLayout: GPUBindGroupLayout;
   private readonly perspectiveViewMatrixBuffer: GPUBuffer;
   private readonly sampler: GPUSampler;
@@ -40,6 +42,7 @@ class Renderer {
     this.device = device;
     this.ctx = ctx;
     this.canvasFormat = "rgba8unorm";
+    this.resourceManager = new ResourceManager(this, device);
     this.settings = {
       clearColour: settings.clearColour ?? [0, 0, 0, 1],
     };
@@ -66,6 +69,7 @@ class Renderer {
       ],
     });
 
+    this.depthTexture = this.createDepthTexture();
     this.sampler = device.createSampler();
   }
 
@@ -254,7 +258,7 @@ class Renderer {
     renderPass.setPipeline(this.renderPipeline);
     renderPass.setBindGroup(0, this.bindGroup0);
 
-    render(this.device, renderPass);
+    render(this.resourceManager, this.device, renderPass);
 
     renderPass.end();
     this.device.queue.submit([encoder.finish(renderPass)]);

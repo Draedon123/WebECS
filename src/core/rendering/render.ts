@@ -1,6 +1,4 @@
 import { EntityManager } from "src/ecs";
-import { IndexArray } from "../meshes";
-import { VertexArray } from "../meshes";
 import {
   calculateModelMatrix,
   calculateNormalMatrix,
@@ -8,16 +6,22 @@ import {
   Rotation,
   Scale,
 } from "../transforms";
-import { BindGroup, Buffer, BufferWriter } from "../gpu";
+import { BufferWriter } from "../gpu";
+import { ResourceManager } from "../ResourceManager";
+import { MeshReference } from "../meshes/MeshReference";
 
-function render(device: GPUDevice, renderPass: GPURenderPassEncoder): void {
+function render(
+  resourceManager: ResourceManager,
+  device: GPUDevice,
+  renderPass: GPURenderPassEncoder
+): void {
   const entityManager = EntityManager.getInstance();
   const renderables = entityManager.queryMultiple({
     type: "intersection",
     queries: [
       {
         type: "intersection",
-        components: [VertexArray, BindGroup, Buffer],
+        components: [MeshReference],
       },
       {
         type: "union",
@@ -27,22 +31,19 @@ function render(device: GPUDevice, renderPass: GPURenderPassEncoder): void {
   });
 
   for (const entity of renderables) {
-    const vertexArray = entityManager.getComponent<VertexArray>(
+    const meshReference = entityManager.getComponent<MeshReference>(
       entity,
-      "VertexArray"
-    );
-    const indexArray = entityManager.getComponent<IndexArray>(
-      entity,
-      "IndexArray"
-    );
-    const bindGroup = entityManager.getComponent<BindGroup>(
-      entity,
-      "BindGroup"
-    );
-    const transformsBuffer = entityManager.getComponent<Buffer>(
-      entity,
-      "Buffer"
-    );
+      "MeshReference"
+    ) as MeshReference;
+
+    const mesh = resourceManager.getMesh(meshReference.meshKey);
+
+    if (mesh === null) {
+      console.error(`No mesh found with key ${meshReference.meshKey}`);
+      return;
+    }
+
+    const object = resourceManager.getObject(entity);
 
     const position =
       entityManager.getComponent<Position>(entity, "Position") ?? undefined;
@@ -51,24 +52,10 @@ function render(device: GPUDevice, renderPass: GPURenderPassEncoder): void {
     const scale =
       entityManager.getComponent<Scale>(entity, "Scale") ?? undefined;
 
-    if (vertexArray === null) {
-      console.error(`No Vertex Array found for entity ${entity}`);
+    if (object === null) {
+      console.error(`Object ${entity} not registered`);
       return;
     }
-
-    if (bindGroup === null) {
-      console.error(`No Bind Group found for entity ${entity}`);
-      return;
-    }
-
-    if (transformsBuffer === null) {
-      console.error(`No Transforms Buffer found for entity ${entity}`);
-      return;
-    }
-
-    vertexArray.initialise(device);
-    bindGroup.initialise(device);
-    transformsBuffer.initialise(device);
 
     const bufferWriter = new BufferWriter((16 + 12) * 4);
     const modelMatrix = calculateModelMatrix({ position, rotation, scale });
@@ -77,20 +64,23 @@ function render(device: GPUDevice, renderPass: GPURenderPassEncoder): void {
     bufferWriter.writeMat4x4f(modelMatrix);
     bufferWriter.writeMat3x3f(normalMatrix);
 
-    device.queue.writeBuffer(transformsBuffer.buffer, 0, bufferWriter.buffer);
+    device.queue.writeBuffer(object.transformBuffer, 0, bufferWriter.buffer);
 
-    renderPass.setVertexBuffer(0, vertexArray.vertexBuffer);
-    renderPass.setBindGroup(1, bindGroup.bindGroup);
+    renderPass.setVertexBuffer(0, mesh.vertices.vertexBuffer);
+    renderPass.setBindGroup(1, object.bindGroup);
 
-    if (indexArray !== null) {
-      if (!indexArray.initialised) {
-        indexArray.initialise(device);
+    if (mesh.indices !== undefined) {
+      if (!mesh.indices.initialised) {
+        mesh.indices.initialise(device);
       }
 
-      renderPass.setIndexBuffer(indexArray.indexBuffer, indexArray.indexFormat);
-      renderPass.drawIndexed(indexArray.indexCount, 1);
+      renderPass.setIndexBuffer(
+        mesh.indices.indexBuffer,
+        mesh.indices.indexFormat
+      );
+      renderPass.drawIndexed(mesh.indices.indexCount, 1);
     } else {
-      renderPass.draw(vertexArray.vertexCount, 1);
+      renderPass.draw(mesh.vertices.vertexCount, 1);
     }
   }
 }

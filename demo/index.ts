@@ -1,7 +1,6 @@
+import { MeshReference } from "src/core/meshes/MeshReference";
 import { Texture } from "src/core/rendering/Texture";
 import {
-  BindGroup,
-  Buffer,
   createCubeMesh,
   EntityManager,
   PerspectiveCamera,
@@ -28,37 +27,20 @@ async function main(): Promise<void> {
 
   const cubeMesh = createCubeMesh();
   const cube = entityManager.createEntity();
-  const transformsBuffer = new Buffer({
-    label: "Cube Transforms",
-    size: (16 + 12) * 4,
-    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-  });
   const cubeRotation = new Rotation();
-  const cubeTexture = await Texture.fetch(
+  const diamondOreTexture = await Texture.fetch(
     import.meta.env.BASE_URL + "/web-assets/diamond_ore.png"
   );
-  // @ts-expect-error will fix later
-  transformsBuffer.initialise(renderer.device);
-  // @ts-expect-error will fix later
-  cubeTexture.initialise(renderer.device);
-  entityManager.addComponent(cube, new VertexArray(cubeMesh, "Cube"));
-  entityManager.addComponent(cube, transformsBuffer);
-  entityManager.addComponent(
-    cube,
-    new BindGroup({
-      layout: renderer.perObjectBindGroupLayout,
-      entries: [
-        {
-          binding: 0,
-          resource: transformsBuffer.buffer,
-        },
-        {
-          binding: 1,
-          resource: cubeTexture.texture.createView(),
-        },
-      ],
-    })
-  );
+
+  renderer.resourceManager.addTexture("diamond_ore", {
+    texture: diamondOreTexture,
+  });
+  renderer.resourceManager.addObject(cube, "diamond_ore");
+  renderer.resourceManager.addMesh("cube", {
+    vertices: new VertexArray(cubeMesh, "Cube"),
+  });
+
+  entityManager.addComponent(cube, new MeshReference("cube"));
   entityManager.addComponent(cube, new Position(0, 0, 0));
   entityManager.addComponent(cube, cubeRotation);
   entityManager.addComponent(cube, new Scale(2));
