@@ -1,4 +1,4 @@
-import { Vector3 } from "../maths/Vector3";
+import { Vector3 } from "../maths";
 
 class Scale {
   public scale: Vector3;

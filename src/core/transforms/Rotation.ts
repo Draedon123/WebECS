@@ -1,6 +1,4 @@
-import { Matrix4 } from "../maths/Matrix4";
-import { Quaternion } from "../maths/Quaternion";
-import { clamp, toDegrees, toRadians } from "../maths/utils";
+import { Matrix4, Quaternion, clamp, toDegrees, toRadians } from "../maths";
 
 class Rotation {
   public quaternion: Quaternion;

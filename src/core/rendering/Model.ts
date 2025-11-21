@@ -1,12 +1,6 @@
 import type { IndexArray, Mesh, VertexArray } from "../meshes";
-import type {
-  HasPosition,
-  HasRotation,
-  HasScale,
-} from "./calculateModelMatrix";
-import { Position } from "./Position";
-import { Rotation } from "./Rotation";
-import { Scale } from "./Scale";
+import type { HasPosition, HasRotation, HasScale } from "../transforms";
+import { Position, Rotation, Scale } from "../transforms";
 
 class Model implements HasPosition, HasRotation, HasScale, Mesh {
   public vertices: VertexArray;

@@ -1,5 +1,4 @@
-import type { Position } from "../transforms/Position";
-import type { Scale } from "../transforms/Scale";
+import type { Position, Scale } from "../transforms";
 import type { Vector3 } from "./Vector3";
 
 class Matrix4 {
