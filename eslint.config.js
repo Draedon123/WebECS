@@ -22,6 +22,17 @@ export default [
     files: ["**/*.ts"],
   },
   {
+    files: ["scripts/**/*.cjs"],
+    rules: {
+      "@typescript-eslint/no-require-imports": 0,
+    },
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
+  {
     ignores: ["web-build/", "dist/"],
   },
 ];
