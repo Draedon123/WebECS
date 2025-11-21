@@ -34,7 +34,7 @@ class VertexArray {
     );
 
     this.vertexBuffer = device.createBuffer({
-      label: this.label + "Vertex Buffer",
+      label: `${this.label} Vertex Buffer`,
       size: vertices.byteLength,
       usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
     });

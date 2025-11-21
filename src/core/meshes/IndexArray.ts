@@ -24,7 +24,7 @@ class IndexArray {
     const indices = new IndexBufferArray(this.rawIndices);
 
     this.indexBuffer = device.createBuffer({
-      label: this.label + "Index Buffer",
+      label: `${this.label} Index Buffer`,
       size: indices.byteLength,
       usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
     });
