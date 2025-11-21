@@ -19,6 +19,7 @@ class Renderer {
 
   private bindGroup0!: GPUBindGroup;
   private renderPipeline!: GPURenderPipeline;
+  private depthTexture!: GPUTexture;
 
   public readonly perObjectBindGroupLayout: GPUBindGroupLayout;
   private readonly perspectiveViewMatrixBuffer: GPUBuffer;
@@ -77,9 +78,21 @@ class Renderer {
 
       this.canvas.width = width;
       this.canvas.height = height;
+
+      this.depthTexture?.destroy();
+      this.depthTexture = this.createDepthTexture();
     }).observe(this.canvas);
 
     await this.initialiseRendering();
+  }
+
+  private createDepthTexture(): GPUTexture {
+    return this.device.createTexture({
+      label: "Renderer Depth Texture",
+      size: [this.canvas.width, this.canvas.height],
+      format: "depth24plus",
+      usage: GPUTextureUsage.RENDER_ATTACHMENT,
+    });
   }
 
   private async initialiseRendering(): Promise<void> {
@@ -170,6 +183,11 @@ class Renderer {
       primitive: {
         cullMode: "back",
       },
+      depthStencil: {
+        format: "depth24plus",
+        depthCompare: "less",
+        depthWriteEnabled: true,
+      },
     });
   }
 
@@ -184,6 +202,12 @@ class Renderer {
           clearValue: this.settings.clearColour,
         },
       ],
+      depthStencilAttachment: {
+        view: this.depthTexture.createView(),
+        depthLoadOp: "clear",
+        depthStoreOp: "store",
+        depthClearValue: 1,
+      },
     });
 
     const entityManager = EntityManager.getInstance();
