@@ -49,4 +49,4 @@ class VertexArray {
   }
 }
 
-export { VertexArray };
+export { VertexArray, type Vertex };
