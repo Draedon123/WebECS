@@ -20,7 +20,7 @@ class Renderer {
   private bindGroup0!: GPUBindGroup;
   private renderPipeline!: GPURenderPipeline;
 
-  public readonly modelMatrixBindGroupLayout: GPUBindGroupLayout;
+  public readonly perObjectBindGroupLayout: GPUBindGroupLayout;
   private readonly perspectiveViewMatrixBuffer: GPUBuffer;
 
   private constructor(
@@ -48,7 +48,7 @@ class Renderer {
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
-    this.modelMatrixBindGroupLayout = this.device.createBindGroupLayout({
+    this.perObjectBindGroupLayout = this.device.createBindGroupLayout({
       label: "Renderer Bind Group Layout 1",
       entries: [
         {
@@ -109,7 +109,7 @@ class Renderer {
 
     const renderPipelineLayout = this.device.createPipelineLayout({
       label: "Renderer Render Pipeline Layout",
-      bindGroupLayouts: [bindGroup0Layout, this.modelMatrixBindGroupLayout],
+      bindGroupLayouts: [bindGroup0Layout, this.perObjectBindGroupLayout],
     });
 
     this.renderPipeline = this.device.createRenderPipeline({
@@ -198,15 +198,16 @@ class Renderer {
       return;
     }
 
-    const perspectiveMatrix = cameraComponent.calculatePerspectiveViewMatrix(
-      cameraPosition,
-      cameraRotation
-    );
+    const perspectiveViewMatrix =
+      cameraComponent.calculatePerspectiveViewMatrix(
+        cameraPosition,
+        cameraRotation
+      );
 
     this.device.queue.writeBuffer(
       this.perspectiveViewMatrixBuffer,
       0,
-      perspectiveMatrix.components.buffer
+      perspectiveViewMatrix.components.buffer
     );
 
     renderPass.setPipeline(this.renderPipeline);

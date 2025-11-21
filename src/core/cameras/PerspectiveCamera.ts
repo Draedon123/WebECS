@@ -47,7 +47,7 @@ class PerspectiveCamera extends Component {
     return viewMatrix;
   }
 
-  private calculateViewMatrix(position: Position, rotation: Rotation): Matrix4 {
+  public calculateViewMatrix(position: Position, rotation: Rotation): Matrix4 {
     return calculateModelMatrix({ position, rotation }).invert();
   }
 

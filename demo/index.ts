@@ -22,34 +22,34 @@ async function main(): Promise<void> {
   const camera = entityManager.createEntity();
   const cameraComponent = new PerspectiveCamera({});
   entityManager.addComponent(camera, cameraComponent);
-  entityManager.addComponent(camera, new Position());
+  entityManager.addComponent(camera, new Position(0, 2, 10));
   entityManager.addComponent(camera, new Rotation(0, 0, 0));
 
   const cubeMesh = createCubeMesh();
   const cube = entityManager.createEntity();
-  const modelMatrixBuffer = new Buffer({
-    label: "Cube Model Matrix",
-    size: 16 * 4,
+  const transformsBuffer = new Buffer({
+    label: "Cube Transforms",
+    size: (16 + 12) * 4,
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
   });
   const cubeRotation = new Rotation();
   // @ts-expect-error will fix later
-  modelMatrixBuffer.initialise(renderer.device);
+  transformsBuffer.initialise(renderer.device);
   entityManager.addComponent(cube, new VertexArray(cubeMesh, "Cube"));
-  entityManager.addComponent(cube, modelMatrixBuffer);
+  entityManager.addComponent(cube, transformsBuffer);
   entityManager.addComponent(
     cube,
     new BindGroup({
-      layout: renderer.modelMatrixBindGroupLayout,
+      layout: renderer.perObjectBindGroupLayout,
       entries: [
         {
           binding: 0,
-          resource: modelMatrixBuffer.buffer,
+          resource: transformsBuffer.buffer,
         },
       ],
     })
   );
-  entityManager.addComponent(cube, new Position(0, -1, -10));
+  entityManager.addComponent(cube, new Position(0, 0, 0));
   entityManager.addComponent(cube, cubeRotation);
   entityManager.addComponent(cube, new Scale(2));
 

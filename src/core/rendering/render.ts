@@ -1,8 +1,15 @@
 import { EntityManager } from "src/ecs";
 import { IndexArray } from "../meshes";
 import { VertexArray } from "../meshes";
-import { calculateModelMatrix, Position, Rotation, Scale } from "../transforms";
+import {
+  calculateModelMatrix,
+  calculateNormalMatrix,
+  Position,
+  Rotation,
+  Scale,
+} from "../transforms";
 import { BindGroup, Buffer } from "../gpu";
+import { BufferWriter } from "../gpu/BufferWriter";
 
 function render(device: GPUDevice, renderPass: GPURenderPassEncoder): void {
   const entityManager = EntityManager.getInstance();
@@ -33,7 +40,7 @@ function render(device: GPUDevice, renderPass: GPURenderPassEncoder): void {
       entity,
       "BindGroup"
     );
-    const modelMatrixBuffer = entityManager.getComponent<Buffer>(
+    const transformsBuffer = entityManager.getComponent<Buffer>(
       entity,
       "Buffer"
     );
@@ -54,20 +61,23 @@ function render(device: GPUDevice, renderPass: GPURenderPassEncoder): void {
       return;
     }
 
-    if (modelMatrixBuffer === null) {
+    if (transformsBuffer === null) {
       console.error(`No Model Matrix Buffer found for entity ${entity}`);
       return;
     }
 
     vertexArray.initialise(device);
     bindGroup.initialise(device);
-    modelMatrixBuffer.initialise(device);
+    transformsBuffer.initialise(device);
 
-    device.queue.writeBuffer(
-      modelMatrixBuffer.buffer,
-      0,
-      calculateModelMatrix({ position, rotation, scale }).components.buffer
-    );
+    const bufferWriter = new BufferWriter((16 + 12) * 4);
+    const modelMatrix = calculateModelMatrix({ position, rotation, scale });
+    const normalMatrix = calculateNormalMatrix({ position, rotation, scale });
+
+    bufferWriter.writeMat4x4f(modelMatrix);
+    bufferWriter.writeMat3x3f(normalMatrix);
+
+    device.queue.writeBuffer(transformsBuffer.buffer, 0, bufferWriter.buffer);
 
     renderPass.setVertexBuffer(0, vertexArray.vertexBuffer);
     renderPass.setBindGroup(1, bindGroup.bindGroup);

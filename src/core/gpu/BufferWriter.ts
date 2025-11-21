@@ -38,8 +38,17 @@ class BufferWriter {
   }
 
   public writeMat3x3f(mat3x3f: Matrix3): void {
-    new Float32Array(this.buffer, this.offset, 9).set(mat3x3f.components);
-    this.offset += 9 * 4;
+    this.writeFloat32(mat3x3f.components[0]);
+    this.writeFloat32(mat3x3f.components[1]);
+    this.writeFloat32(mat3x3f.components[2]);
+    this.pad(4);
+    this.writeFloat32(mat3x3f.components[3]);
+    this.writeFloat32(mat3x3f.components[4]);
+    this.writeFloat32(mat3x3f.components[5]);
+    this.pad(4);
+    this.writeFloat32(mat3x3f.components[6]);
+    this.writeFloat32(mat3x3f.components[7]);
+    this.writeFloat32(mat3x3f.components[8]);
   }
 
   public writeMat4x4f(mat4x4f: Matrix4): void {
