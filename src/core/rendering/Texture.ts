@@ -33,7 +33,10 @@ class Texture extends Component {
       label: this.label,
       size: [this.width, this.height],
       format: "rgba8unorm",
-      usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+      usage:
+        GPUTextureUsage.RENDER_ATTACHMENT |
+        GPUTextureUsage.TEXTURE_BINDING |
+        GPUTextureUsage.COPY_DST,
     });
 
     device.queue.copyExternalImageToTexture(
@@ -56,6 +59,19 @@ class Texture extends Component {
     const bitmap = await createImageBitmap(data);
 
     return new Texture(bitmap, bitmap.width, bitmap.height, label);
+  }
+
+  /** 0-255 */
+  public static colour(
+    r: number,
+    g: number,
+    b: number,
+    a: number = 255,
+    label?: string
+  ): Texture {
+    const bitmap = new ImageData(new Uint8ClampedArray([r, g, b, a]), 1, 1);
+
+    return new Texture(bitmap, 1, 1, label);
   }
 }
 

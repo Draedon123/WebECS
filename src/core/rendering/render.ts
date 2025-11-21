@@ -43,6 +43,7 @@ function render(device: GPUDevice, renderPass: GPURenderPassEncoder): void {
       entity,
       "Buffer"
     );
+
     const position =
       entityManager.getComponent<Position>(entity, "Position") ?? undefined;
     const rotation =
@@ -61,7 +62,7 @@ function render(device: GPUDevice, renderPass: GPURenderPassEncoder): void {
     }
 
     if (transformsBuffer === null) {
-      console.error(`No Model Matrix Buffer found for entity ${entity}`);
+      console.error(`No Transforms Buffer found for entity ${entity}`);
       return;
     }
 

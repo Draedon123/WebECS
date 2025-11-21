@@ -1,3 +1,4 @@
+import { Texture } from "src/core/rendering/Texture";
 import {
   BindGroup,
   Buffer,
@@ -33,8 +34,11 @@ async function main(): Promise<void> {
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
   });
   const cubeRotation = new Rotation();
+  const cubeTexture = Texture.colour(255, 0, 0);
   // @ts-expect-error will fix later
   transformsBuffer.initialise(renderer.device);
+  // @ts-expect-error will fix later
+  cubeTexture.initialise(renderer.device);
   entityManager.addComponent(cube, new VertexArray(cubeMesh, "Cube"));
   entityManager.addComponent(cube, transformsBuffer);
   entityManager.addComponent(
@@ -45,6 +49,10 @@ async function main(): Promise<void> {
         {
           binding: 0,
           resource: transformsBuffer.buffer,
+        },
+        {
+          binding: 1,
+          resource: cubeTexture.texture.createView(),
         },
       ],
     })

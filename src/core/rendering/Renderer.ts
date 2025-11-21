@@ -2,7 +2,7 @@ import { EntityManager, type Entity } from "src/ecs";
 import { Shader } from "./Shader";
 import { Position, Rotation } from "../transforms";
 import { PerspectiveCamera } from "../cameras/PerspectiveCamera";
-import { render } from "../meshes";
+import { render } from "./render";
 
 type RendererSettings = {
   clearColour: GPUColor;
@@ -22,6 +22,7 @@ class Renderer {
 
   public readonly perObjectBindGroupLayout: GPUBindGroupLayout;
   private readonly perspectiveViewMatrixBuffer: GPUBuffer;
+  private readonly sampler: GPUSampler;
 
   private constructor(
     canvas: HTMLCanvasElement,
@@ -49,15 +50,22 @@ class Renderer {
     });
 
     this.perObjectBindGroupLayout = this.device.createBindGroupLayout({
-      label: "Renderer Bind Group Layout 1",
+      label: "Renderer Per Object Bind Group Layout",
       entries: [
         {
           binding: 0,
           buffer: { type: "uniform" },
           visibility: GPUShaderStage.VERTEX,
         },
+        {
+          binding: 1,
+          texture: {},
+          visibility: GPUShaderStage.FRAGMENT,
+        },
       ],
     });
+
+    this.sampler = device.createSampler();
   }
 
   public async initialise(): Promise<void> {
@@ -93,6 +101,11 @@ class Renderer {
           buffer: { type: "uniform" },
           visibility: GPUShaderStage.VERTEX,
         },
+        {
+          binding: 1,
+          sampler: {},
+          visibility: GPUShaderStage.FRAGMENT,
+        },
       ],
     });
 
@@ -103,6 +116,10 @@ class Renderer {
         {
           binding: 0,
           resource: { buffer: this.perspectiveViewMatrixBuffer },
+        },
+        {
+          binding: 1,
+          resource: this.sampler,
         },
       ],
     });
