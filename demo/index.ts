@@ -34,7 +34,9 @@ async function main(): Promise<void> {
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
   });
   const cubeRotation = new Rotation();
-  const cubeTexture = Texture.colour(255, 0, 0);
+  const cubeTexture = await Texture.fetch(
+    import.meta.env.BASE_URL + "/web-assets/diamond_ore.png"
+  );
   // @ts-expect-error will fix later
   transformsBuffer.initialise(renderer.device);
   // @ts-expect-error will fix later

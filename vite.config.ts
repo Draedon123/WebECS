@@ -1,7 +1,10 @@
 import path from "path";
 import { defineConfig } from "vite";
+import { additionalHMR } from "./vite-plugins/additionalHMR";
+import { assetExcluder } from "./vite-plugins/assetExcluder";
 
-const additionalHMR: RegExp = /\.wgsl$/;
+const ADDITIONAL_HMR_REGEXP: RegExp = /\.wgsl$/;
+const EXCLUDE_DIRECTORIES: string[] = ["web-assets"];
 
 export default defineConfig({
   build: {
@@ -17,16 +20,8 @@ export default defineConfig({
   base: "/WebECS",
   publicDir: "assets",
   plugins: [
-    {
-      name: "WGSL HMR",
-      handleHotUpdate(ctx) {
-        if (!ctx.file.match(additionalHMR)) {
-          return;
-        }
-
-        ctx.server.ws.send({ type: "full-reload" });
-      },
-    },
+    additionalHMR(ADDITIONAL_HMR_REGEXP),
+    assetExcluder(EXCLUDE_DIRECTORIES),
   ],
   resolve: {
     alias: {
