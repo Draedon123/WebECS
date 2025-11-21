@@ -30,6 +30,10 @@ class Vector3 {
     return this;
   }
 
+  public get magnitude(): number {
+    return Math.hypot(this.x, this.y, this.z);
+  }
+
   public get x(): number {
     return this.components[0];
   }

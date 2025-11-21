@@ -18,6 +18,7 @@ class Renderer {
   private readonly canvasFormat: GPUTextureFormat;
 
   private bindGroup0!: GPUBindGroup;
+  private renderPipeline!: GPURenderPipeline;
 
   public readonly modelMatrixBindGroupLayout: GPUBindGroupLayout;
   private readonly perspectiveViewMatrixBuffer: GPUBuffer;
@@ -79,7 +80,7 @@ class Renderer {
       format: this.canvasFormat,
     });
 
-    const shader = await Shader.fetch(import.meta.env.BASE_URL + "flat.wgsl");
+    const shader = await Shader.fetch(import.meta.env.BASE_URL + "/flat.wgsl");
     shader.initialise(this.device);
 
     const bindGroup0Layout = this.device.createBindGroupLayout({
@@ -102,6 +103,51 @@ class Renderer {
           resource: { buffer: this.perspectiveViewMatrixBuffer },
         },
       ],
+    });
+
+    const renderPipelineLayout = this.device.createPipelineLayout({
+      label: "Renderer Render Pipeline Layout",
+      bindGroupLayouts: [bindGroup0Layout, this.modelMatrixBindGroupLayout],
+    });
+
+    this.renderPipeline = this.device.createRenderPipeline({
+      label: "Renderer Render Pipeline",
+      layout: renderPipelineLayout,
+      vertex: {
+        module: shader.shader,
+        entryPoint: "vertexMain",
+        buffers: [
+          {
+            arrayStride: (3 + 2 + 3) * 4,
+            attributes: [
+              {
+                shaderLocation: 0,
+                format: "float32x3",
+                offset: 0,
+              },
+              {
+                shaderLocation: 1,
+                format: "float32x2",
+                offset: 3 * 4,
+              },
+              {
+                shaderLocation: 2,
+                format: "float32x3",
+                offset: (3 + 2) * 4,
+              },
+            ],
+          },
+        ],
+      },
+      fragment: {
+        module: shader.shader,
+        entryPoint: "fragmentMain",
+        targets: [
+          {
+            format: this.canvasFormat,
+          },
+        ],
+      },
     });
   }
 
@@ -158,6 +204,7 @@ class Renderer {
       perspectiveMatrix.components.buffer
     );
 
+    renderPass.setPipeline(this.renderPipeline);
     renderPass.setBindGroup(0, this.bindGroup0);
 
     render(this.device, renderPass);

@@ -1,7 +1,7 @@
 import { Vector2, Vector3 } from "../maths";
 import type { Vertex } from "./VertexArray";
 
-function createCubeMesh(sideLength: number): Vertex[] {
+function createCubeMesh(sideLength: number = 1): Vertex[] {
   const x = sideLength / 2;
 
   const POSITIONS = {

@@ -33,6 +33,7 @@ export default defineConfig({
   resolve: {
     alias: {
       webecs: path.resolve(__dirname, "src/index.ts"),
+      src: path.resolve(__dirname, "src"),
     },
   },
 });

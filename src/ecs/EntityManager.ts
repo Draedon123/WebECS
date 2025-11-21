@@ -43,7 +43,7 @@ class EntityManager {
   }
 
   public queryMultiple(query: MultiQuery): Entity[] {
-    const candidates = query.queries.map(this.querySingular);
+    const candidates = query.queries.map(this.querySingular.bind(this));
 
     switch (query.type) {
       case "union": {
@@ -147,19 +147,13 @@ class EntityManager {
 }
 
 function union<T>(array: T[][]): T[] {
-  const seen: Map<T, true> = new Map();
-
-  // remove duplicates
-  return array
-    .flat()
-    .filter((element) =>
-      seen.has(element) ? false : (seen.set(element, true), true)
-    );
+  return removeDuplicates(array.flat());
 }
 
 function intersection<T>(array: T[][]): T[] {
   const flattened = array.flat();
   const count: Map<T, number> = new Map();
+
   for (const element of flattened) {
     if (!count.has(element)) {
       count.set(element, 1);
@@ -168,8 +162,18 @@ function intersection<T>(array: T[][]): T[] {
     }
   }
 
-  return flattened.filter(
-    (element) => (count.get(element) as number) === array.length
+  return removeDuplicates(
+    flattened.filter(
+      (element) => (count.get(element) as number) === array.length
+    )
+  );
+}
+
+function removeDuplicates<T>(array: T[]): T[] {
+  const seen: Map<T, true> = new Map();
+
+  return array.filter((element) =>
+    seen.has(element) ? false : (seen.set(element, true), true)
   );
 }
 

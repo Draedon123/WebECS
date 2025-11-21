@@ -20,9 +20,9 @@ type Transformable = Partial<HasPosition & HasRotation & HasScale>;
 function calculateModelMatrix(object: Transformable): Matrix4 {
   const modelMatrix = new Matrix4();
 
-  if (object.scale !== undefined) {
-    const scale = Matrix4.fromScale(object.scale);
-    Matrix4.multiplyMatrices(modelMatrix, scale, modelMatrix);
+  if (object.position !== undefined) {
+    const translation = Matrix4.fromTranslation(object.position);
+    Matrix4.multiplyMatrices(modelMatrix, translation, modelMatrix);
   }
 
   if (object.rotation !== undefined) {
@@ -30,11 +30,10 @@ function calculateModelMatrix(object: Transformable): Matrix4 {
     Matrix4.multiplyMatrices(modelMatrix, rotation, modelMatrix);
   }
 
-  if (object.position !== undefined) {
-    const translation = Matrix4.fromTranslation(object.position);
-    Matrix4.multiplyMatrices(modelMatrix, translation, modelMatrix);
+  if (object.scale !== undefined) {
+    const scale = Matrix4.fromScale(object.scale);
+    Matrix4.multiplyMatrices(modelMatrix, scale, modelMatrix);
   }
-
   return modelMatrix;
 }
 

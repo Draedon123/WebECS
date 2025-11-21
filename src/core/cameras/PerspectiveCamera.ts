@@ -1,6 +1,6 @@
 import { Component } from "src/ecs";
-import { Matrix4, toDegrees, toRadians } from "../maths";
-import { calculateModelMatrix, Position, Rotation } from "../transforms";
+import { Matrix4, toDegrees, toRadians, Vector3 } from "../maths";
+import { Position, Rotation } from "../transforms";
 
 type PerspectiveCameraOptions = {
   /** degrees */
@@ -18,7 +18,7 @@ class PerspectiveCamera extends Component {
   public far: number;
   public aspectRatio: number;
 
-  constructor(options: Partial<PerspectiveCameraOptions>) {
+  constructor(options: Partial<PerspectiveCameraOptions> = {}) {
     super(PerspectiveCamera.tag);
 
     this.fovDegrees = options.fov ?? 60;
@@ -42,14 +42,27 @@ class PerspectiveCamera extends Component {
     const perspectiveMatrix = this.calculatePerspectiveMatrix();
     const viewMatrix = this.calculateViewMatrix(position, rotation);
 
-    Matrix4.multiplyMatrices(viewMatrix, perspectiveMatrix, viewMatrix);
+    Matrix4.multiplyMatrices(perspectiveMatrix, viewMatrix, viewMatrix);
 
     return viewMatrix;
   }
 
   private calculateViewMatrix(position: Position, rotation: Rotation): Matrix4 {
-    const modelMatrix = calculateModelMatrix({ position, rotation });
-    return modelMatrix.invert();
+    let forward = new Vector3(
+      rotation.quaternion.x,
+      rotation.quaternion.y,
+      rotation.quaternion.z
+    );
+
+    if (forward.magnitude < 1e-6) {
+      forward = new Vector3(0, 0, 1);
+    }
+
+    return Matrix4.lookAt(
+      position.position,
+      forward.add(position.position),
+      new Vector3(0, 1, 0)
+    );
   }
 
   private calculatePerspectiveMatrix(): Matrix4 {
