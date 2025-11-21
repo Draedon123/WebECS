@@ -1,7 +1,10 @@
+import type { Position } from "../transforms/Position";
+import type { Scale } from "../transforms/Scale";
 import type { Vector3 } from "./Vector3";
 
 class Matrix4 {
   public readonly components: Float32Array;
+  /** returns identity matrix */
   constructor() {
     // prettier-ignore
     this.components = new Float32Array([
@@ -273,6 +276,26 @@ class Matrix4 {
       (a20 * b03 - a21 * b01 + a22 * b00) * inverseDeterminant;
 
     return this;
+  }
+
+  public static fromTranslation(translation: Position): Matrix4 {
+    const matrix = new Matrix4();
+
+    matrix.components[12] = translation.x;
+    matrix.components[13] = translation.y;
+    matrix.components[14] = translation.z;
+
+    return matrix;
+  }
+
+  public static fromScale(scale: Scale): Matrix4 {
+    const matrix = new Matrix4();
+
+    matrix.components[0] = scale.x;
+    matrix.components[5] = scale.y;
+    matrix.components[10] = scale.z;
+
+    return matrix;
   }
 }
 
