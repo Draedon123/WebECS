@@ -1,7 +1,8 @@
 import { Vector2, Vector3 } from "../maths";
+import type { UnindexedMesh } from "./render";
 import { VertexArray, type Vertex } from "./VertexArray";
 
-class Cube {
+class Cube implements UnindexedMesh {
   public readonly vertices: VertexArray;
 
   constructor(sideLength: number) {
