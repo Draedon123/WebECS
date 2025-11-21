@@ -23,7 +23,7 @@ async function main(): Promise<void> {
   const cameraComponent = new PerspectiveCamera({});
   entityManager.addComponent(camera, cameraComponent);
   entityManager.addComponent(camera, new Position());
-  entityManager.addComponent(camera, new Rotation());
+  entityManager.addComponent(camera, new Rotation(0, 45, 0));
 
   const cubeMesh = createCubeMesh();
   const cube = entityManager.createEntity();

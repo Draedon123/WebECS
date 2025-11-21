@@ -23,11 +23,42 @@ class Quaternion {
     return this;
   }
 
+  public static clone(quaternion: Quaternion): Quaternion {
+    return new Quaternion(
+      quaternion.x,
+      quaternion.y,
+      quaternion.z,
+      quaternion.w
+    );
+  }
+
   public copyFrom(quaternion: Quaternion): this {
     this.components[0] = quaternion.components[0];
     this.components[1] = quaternion.components[1];
     this.components[2] = quaternion.components[2];
     this.components[3] = quaternion.components[3];
+
+    return this;
+  }
+
+  public static invert(quaternion: Quaternion): Quaternion {
+    return Quaternion.clone(quaternion).invert();
+  }
+
+  public invert(): this {
+    const magnitude = this.magnitude;
+
+    if (magnitude < 1e-8) {
+      console.error("Magnitude of vector too close to 0 to invert");
+      return this;
+    }
+
+    const scale = 1 / (magnitude * magnitude);
+
+    this.x *= -scale;
+    this.y *= -scale;
+    this.z *= -scale;
+    this.w *= scale;
 
     return this;
   }
