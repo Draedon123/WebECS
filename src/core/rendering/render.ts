@@ -8,8 +8,7 @@ import {
   Rotation,
   Scale,
 } from "../transforms";
-import { BindGroup, Buffer } from "../gpu";
-import { BufferWriter } from "../gpu/BufferWriter";
+import { BindGroup, Buffer, BufferWriter } from "../gpu";
 
 function render(device: GPUDevice, renderPass: GPURenderPassEncoder): void {
   const entityManager = EntityManager.getInstance();
