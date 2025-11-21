@@ -1,13 +1,16 @@
-class IndexArray {
+import { Component } from "src/ecs";
+
+class IndexArray extends Component {
+  public static readonly tag: string = "IndexArray";
+
   public readonly label: string;
-
   public indexBuffer!: GPUBuffer;
-
   private initialised: boolean;
-
   private readonly rawIndices: number[];
 
   constructor(indices: number[], label: string = "") {
+    super(IndexArray.tag);
+
     this.rawIndices = indices;
     this.label = label;
 

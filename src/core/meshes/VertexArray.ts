@@ -1,3 +1,4 @@
+import { Component } from "src/ecs";
 import type { Vector2, Vector3 } from "../maths";
 
 type Vertex = {
@@ -6,16 +7,17 @@ type Vertex = {
   normal: Vector3;
 };
 
-class VertexArray {
+class VertexArray extends Component {
+  public static readonly tag: string = "VertexArray";
+
   public readonly label: string;
-
   public vertexBuffer!: GPUBuffer;
-
   private initialised: boolean;
-
   private readonly rawVertices: Vertex[];
 
   constructor(vertices: Vertex[], label: string = "") {
+    super(VertexArray.tag);
+
     this.rawVertices = vertices;
     this.label = label;
 

@@ -16,6 +16,8 @@ export default [
     },
     rules: {
       "@typescript-eslint/no-explicit-any": 0,
+      // mainly used as identifiers
+      "@typescript-eslint/no-extraneous-class": 0,
     },
   },
   {

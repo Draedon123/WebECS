@@ -1,11 +1,16 @@
+import { Component } from "src/ecs";
 import { Vector3 } from "../maths";
 
-class Scale {
+class Scale extends Component {
+  public static readonly tag: string = "Scale";
+
   public scale: Vector3;
 
   constructor(scale?: Vector3 | number);
   constructor(x: number, y: number, z: number);
   constructor(scale: number | Vector3 = 1, y?: number, z?: number) {
+    super(Scale.tag);
+
     if (typeof scale === "number") {
       if (y !== undefined) {
         scale = new Vector3(scale, y, z as number);

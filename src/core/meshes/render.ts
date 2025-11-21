@@ -1,29 +1,43 @@
-import type { IndexArray } from "./IndexArray";
-import type { VertexArray } from "./VertexArray";
+import { EntityManager } from "src/ecs";
+import { IndexArray } from "./IndexArray";
+import { VertexArray } from "./VertexArray";
+import { Position, Rotation, Scale } from "../transforms";
 
-type UnindexedMesh = {
-  vertices: VertexArray;
-};
+function render(renderPass: GPURenderPassEncoder): void {
+  const entityManager = EntityManager.getInstance();
+  const renderables = entityManager.queryMultiple({
+    type: "intersection",
+    queries: [
+      {
+        type: "singleMatch",
+        component: VertexArray,
+      },
+      {
+        type: "union",
+        components: [Position, Rotation, Scale],
+      },
+    ],
+  });
 
-type IndexedMesh = UnindexedMesh & {
-  indices: IndexArray;
-};
-
-type Mesh = UnindexedMesh & Partial<IndexedMesh>;
-
-function render(mesh: Mesh, renderPass: GPURenderPassEncoder): void {
-  renderPass.setVertexBuffer(0, mesh.vertices.vertexBuffer);
-
-  if (mesh.indices !== undefined) {
-    renderPass.setIndexBuffer(
-      mesh.indices.indexBuffer,
-      mesh.indices.indexFormat
+  for (const entity of renderables) {
+    const vertexArray = entityManager.getComponent(
+      entity,
+      "VertexArray"
+    ) as VertexArray;
+    const indexArray = entityManager.getComponent<IndexArray>(
+      entity,
+      "IndexArray"
     );
-    renderPass.drawIndexed(mesh.indices.indexCount, 1);
-  } else {
-    renderPass.draw(mesh.vertices.vertexCount, 1);
+
+    renderPass.setVertexBuffer(0, vertexArray.vertexBuffer);
+
+    if (indexArray !== null) {
+      renderPass.setIndexBuffer(indexArray.indexBuffer, indexArray.indexFormat);
+      renderPass.drawIndexed(indexArray.indexCount, 1);
+    } else {
+      renderPass.draw(vertexArray.vertexCount, 1);
+    }
   }
 }
 
 export { render };
-export type { UnindexedMesh, IndexedMesh, Mesh };

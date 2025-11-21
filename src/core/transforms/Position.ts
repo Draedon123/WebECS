@@ -1,8 +1,13 @@
+import { Component } from "src/ecs";
 import { Vector3 } from "../maths";
 
-class Position {
+class Position extends Component {
+  public static readonly tag: string = "Position";
+
   public position: Vector3;
   constructor(position: Vector3 = new Vector3(0, 0, 0)) {
+    super(Position.tag);
+
     this.position = position;
   }
 

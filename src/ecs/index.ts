@@ -1,2 +1,2 @@
-export * from "./Entity";
-export * from "./System";
+export * from "./EntityManager";
+export * from "./Component";

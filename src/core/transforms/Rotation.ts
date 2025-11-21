@@ -1,10 +1,15 @@
+import { Component } from "src/ecs";
 import { Matrix4, Quaternion, clamp, toDegrees, toRadians } from "../maths";
 
-class Rotation {
+class Rotation extends Component {
+  public static readonly tag: string = "Rotation";
+
   public quaternion: Quaternion;
 
   /** degrees */
   constructor(x: number = 0, y: number = 0, z: number = 0) {
+    super(Rotation.tag);
+
     x = toRadians(x);
     y = toRadians(y);
     z = toRadians(z);
