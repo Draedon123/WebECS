@@ -5,7 +5,6 @@ class IndexArray extends Component {
 
   public readonly label: string;
   public indexBuffer!: GPUBuffer;
-  private initialised: boolean;
   private readonly rawIndices: number[];
 
   constructor(indices: number[], label: string = "") {
@@ -13,8 +12,10 @@ class IndexArray extends Component {
 
     this.rawIndices = indices;
     this.label = label;
+  }
 
-    this.initialised = false;
+  public get initialised(): boolean {
+    return this.indexBuffer !== undefined;
   }
 
   public initialise(device: GPUDevice): void {
@@ -33,8 +34,6 @@ class IndexArray extends Component {
     });
 
     device.queue.writeBuffer(this.indexBuffer, 0, indices);
-
-    this.initialised = true;
   }
 
   public get indexFormat(): GPUIndexFormat {

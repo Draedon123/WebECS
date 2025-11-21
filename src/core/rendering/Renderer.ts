@@ -11,6 +11,8 @@ class Renderer {
   private readonly ctx: GPUCanvasContext;
   private readonly canvasFormat: GPUTextureFormat;
 
+  private bindGroup!: GPUBindGroup;
+
   private constructor(
     canvas: HTMLCanvasElement,
     device: GPUDevice,
@@ -51,6 +53,11 @@ class Renderer {
     this.ctx.configure({
       device: this.device,
       format: this.canvasFormat,
+    });
+
+    const bindGroupLayout = this.device.createBindGroupLayout({
+      label: "Renderer Bind Group Layout",
+      entries: [],
     });
   }
 
