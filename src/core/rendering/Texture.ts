@@ -5,20 +5,20 @@ class Texture extends Component {
 
   public texture!: GPUTexture;
 
-  private readonly source: GPUCopyExternalImageSource;
+  private readonly sources: GPUCopyExternalImageSource[];
   private readonly width: number;
   private readonly height: number;
   private readonly label?: string;
 
   constructor(
-    source: GPUCopyExternalImageSource,
+    sources: GPUCopyExternalImageSource[],
     width: number,
     height: number,
     label?: string
   ) {
     super(Texture.tag);
 
-    this.source = source;
+    this.sources = sources;
     this.width = width;
     this.height = height;
     this.label = label;
@@ -39,26 +39,27 @@ class Texture extends Component {
         GPUTextureUsage.COPY_DST,
     });
 
-    device.queue.copyExternalImageToTexture(
-      {
-        source: this.source,
-        flipY: true,
-      },
-      {
-        texture: this.texture,
-      },
-      {
-        width: this.width,
-        height: this.height,
-      }
-    );
+    for (const source of this.sources) {
+      device.queue.copyExternalImageToTexture(
+        {
+          source: source,
+          flipY: true,
+        },
+        {
+          texture: this.texture,
+        },
+        {
+          width: this.width,
+          height: this.height,
+        }
+      );
+    }
   }
 
-  public static async fetch(url: string, label?: string): Promise<Texture> {
-    const data = await (await fetch(url)).blob();
-    const bitmap = await createImageBitmap(data);
+  public static async fetch(urls: string[], label?: string): Promise<Texture> {
+    const bitmaps = await Texture.toBitmap(urls);
 
-    return new Texture(bitmap, bitmap.width, bitmap.height, label);
+    return new Texture(bitmaps, bitmaps[0].width, bitmaps[0].height, label);
   }
 
   /** 0-255 */
@@ -69,9 +70,34 @@ class Texture extends Component {
     a: number = 255,
     label?: string
   ): Texture {
-    const bitmap = new ImageData(new Uint8ClampedArray([r, g, b, a]), 1, 1);
+    const imageData = new ImageData(new Uint8ClampedArray([r, g, b, a]), 1, 1);
 
-    return new Texture(bitmap, 1, 1, label);
+    return new Texture([imageData], 1, 1, label);
+  }
+
+  public static createCubemap(
+    textureDirectory: string,
+    label?: string
+  ): Promise<Texture> {
+    return Texture.fetch(
+      [
+        `${textureDirectory}/px.png`,
+        `${textureDirectory}/nx.png`,
+        `${textureDirectory}/py.png`,
+        `${textureDirectory}/ny.png`,
+        `${textureDirectory}/pz.png`,
+        `${textureDirectory}/nz.png`,
+      ],
+      label
+    );
+  }
+
+  protected static toBitmap(urls: string[]): Promise<ImageBitmap[]> {
+    const requests = urls.map(
+      async (url) => await createImageBitmap(await (await fetch(url)).blob())
+    );
+
+    return Promise.all(requests);
   }
 }
 
