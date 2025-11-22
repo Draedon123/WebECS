@@ -16,18 +16,18 @@ type Mesh = MeshEntry & {
 
 async function loadObj(filePath: string): Promise<{
   meshes: Mesh[];
-  materials: Record<string, Material>;
+  materials: Material[];
 }> {
   const fileContents = await (await fetch(filePath)).text();
   const lines = fileContents.split(/[\r\n]+/);
 
-  const vertices: Vertex[] = [];
-  const indices: number[] = [];
+  let vertices: Vertex[] = [];
+  let indices: number[] = [];
 
   const vertexPositions: Vector3[] = [];
   const textureCoordinates: Vector2[] = [];
   const vertexNormals: Vector3[] = [];
-  const materials: Record<string, Material> = {};
+  const materials: Material[] = [];
 
   const meshes: Mesh[] = [];
 
@@ -48,7 +48,7 @@ async function loadObj(filePath: string): Promise<{
         const loadedMaterials = await loadMtl(mtlPath);
 
         for (const material of loadedMaterials) {
-          materials[material.name] = material;
+          materials.push(material);
         }
 
         break;
@@ -58,9 +58,10 @@ async function loadObj(filePath: string): Promise<{
         if (meshes[meshes.length - 1].materialName === "") {
           meshes[meshes.length - 1].materialName = parts[1];
         } else {
-          meshes[meshes.length - 1].indices = new IndexArray(
-            indices.splice(0, indices.length)
-          );
+          meshes[meshes.length - 1].indices = new IndexArray(indices);
+
+          vertices = [];
+          indices = [];
 
           meshes.push({
             name: "_" + meshes[meshes.length - 1].name,
@@ -76,10 +77,11 @@ async function loadObj(filePath: string): Promise<{
         const meshName = parts[1];
 
         if (meshes.length > 0) {
-          meshes[meshes.length - 1].indices = new IndexArray(
-            indices.splice(0, indices.length)
-          );
+          meshes[meshes.length - 1].indices = new IndexArray(indices);
         }
+
+        indices = [];
+        vertices = [];
 
         meshes.push({
           name: meshName,
@@ -113,7 +115,9 @@ async function loadObj(filePath: string): Promise<{
         const y = parseFloat(parts[2]);
         const z = parseFloat(parts[3]);
 
-        vertexNormals.push(new Vector3(x, y, z).normalise());
+        // should probably normalise but normalisation is already done in the
+        // shader anyways
+        vertexNormals.push(new Vector3(x, y, z)); /*.normalise())*/
         break;
       }
 
@@ -126,6 +130,7 @@ async function loadObj(filePath: string): Promise<{
           // will be NaN if nonexistent
           const textureCoordinateIndex = parseInt(vertexParts[1]) - 1;
           const normalsIndex = parseInt(vertexParts[2]) - 1;
+
           const position = vertexPositions.at(positionIndex) as Vector3;
           const uv =
             textureCoordinates.at(textureCoordinateIndex) ?? new Vector2(0, 0);

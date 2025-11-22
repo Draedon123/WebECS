@@ -46,7 +46,6 @@ class Texture extends Component {
       },
       {
         texture: this.texture,
-        origin: [0, 0],
       },
       {
         width: this.width,

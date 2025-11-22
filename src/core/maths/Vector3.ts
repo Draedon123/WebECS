@@ -1,35 +1,47 @@
 class Vector3 {
   private readonly components: Float32Array;
   constructor(x: number = 0, y: number = 0, z: number = 0) {
-    this.components = new Float32Array([x, y, z]);
+    this.components = new Float32Array(3);
+
+    this.components[0] = x;
+    this.components[1] = y;
+    this.components[2] = z;
   }
 
   *[Symbol.iterator]() {
-    yield this.x;
-    yield this.y;
-    yield this.z;
+    yield this.components[0];
+    yield this.components[1];
+    yield this.components[2];
   }
 
   public static add(a: Vector3, b: Vector3): Vector3 {
-    return new Vector3(a.x + b.x, a.y + b.y, a.z + b.z);
+    return new Vector3(
+      a.components[0] + b.components[0],
+      a.components[1] + b.components[1],
+      a.components[2] + b.components[2]
+    );
   }
 
   public add(vector3: Vector3): this {
-    this.x += vector3.x;
-    this.y += vector3.y;
-    this.z += vector3.z;
+    this.components[0] += vector3.components[0];
+    this.components[1] += vector3.components[1];
+    this.components[2] += vector3.components[2];
 
     return this;
   }
 
   public static subtract(a: Vector3, b: Vector3): Vector3 {
-    return new Vector3(a.x - b.x, a.y - b.y, a.z - b.z);
+    return new Vector3(
+      a.components[0] - b.components[0],
+      a.components[1] - b.components[1],
+      a.components[2] - b.components[2]
+    );
   }
 
   public scale(factor: number): this {
-    this.x *= factor;
-    this.y *= factor;
-    this.z *= factor;
+    this.components[0] *= factor;
+    this.components[1] *= factor;
+    this.components[2] *= factor;
 
     return this;
   }
@@ -42,13 +54,21 @@ class Vector3 {
       return this;
     }
 
-    this.scale(1 / magnitude);
+    const scale = 1 / magnitude;
+
+    this.components[0] *= scale;
+    this.components[1] *= scale;
+    this.components[2] *= scale;
 
     return this;
   }
 
   public get magnitude(): number {
-    return Math.hypot(this.x, this.y, this.z);
+    return Math.hypot(
+      this.components[0],
+      this.components[1],
+      this.components[2]
+    );
   }
 
   public get x(): number {

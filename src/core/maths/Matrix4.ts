@@ -6,12 +6,12 @@ class Matrix4 {
   /** returns identity matrix */
   constructor() {
     // prettier-ignore
-    this.components = new Float32Array([
-      1, 0, 0, 0,
-      0, 1, 0, 0,
-      0, 0, 1, 0,
-      0, 0, 0, 1
-    ]);
+    this.components = new Float32Array(16);
+
+    this.components[0] = 1;
+    this.components[5] = 1;
+    this.components[10] = 1;
+    this.components[15] = 1;
   }
 
   public static multiplyMatrices(

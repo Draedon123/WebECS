@@ -162,10 +162,6 @@ class ResourceManager {
     const modelEntity = entityManager.createEntity(children);
 
     for (const mesh of model) {
-      // if (!mesh.meshReference.includes("WingLeft")) {
-      //   continue;
-      // }
-
       const meshReference = new MeshReference(mesh.meshReference);
       const textureReference = new TextureReference(mesh.textureReference);
       const parent = new Parent(modelEntity);

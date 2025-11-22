@@ -7,11 +7,13 @@ class IndexArray extends Component {
   public readonly label: string;
   public indexBuffer!: GPUBuffer;
   private readonly rawIndices: number[];
+  public readonly indexFormat: GPUIndexFormat;
 
   constructor(indices: number[], label: string = "") {
     super(IndexArray.tag);
 
     this.rawIndices = indices;
+    this.indexFormat = IndexArray.getIndexFormat(indices);
     this.label = label;
   }
 
@@ -45,8 +47,8 @@ class IndexArray extends Component {
     device.queue.writeBuffer(this.indexBuffer, 0, indices);
   }
 
-  public get indexFormat(): GPUIndexFormat {
-    return Math.max(...this.rawIndices) > 0xffff ? "uint32" : "uint16";
+  private static getIndexFormat(indices: number[]): GPUIndexFormat {
+    return Math.max(...indices) > 0xffff ? "uint32" : "uint16";
   }
 
   public get indexCount(): number {

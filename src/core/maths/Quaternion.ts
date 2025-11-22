@@ -1,19 +1,24 @@
 class Quaternion {
   public readonly components: Float32Array;
   constructor(x: number = 0, y: number = 0, z: number = 0, w: number = 1) {
-    this.components = new Float32Array([x, y, z, w]);
+    this.components = new Float32Array(4);
+
+    this.components[0] = x;
+    this.components[1] = y;
+    this.components[2] = z;
+    this.components[3] = w;
   }
 
   public multiply(quaternion: Quaternion): this {
-    const ax = this.x;
-    const ay = this.y;
-    const az = this.z;
-    const aw = this.w;
+    const ax = this.components[0];
+    const ay = this.components[1];
+    const az = this.components[2];
+    const aw = this.components[3];
 
-    const bx = quaternion.x;
-    const by = quaternion.y;
-    const bz = quaternion.z;
-    const bw = quaternion.w;
+    const bx = quaternion.components[0];
+    const by = quaternion.components[1];
+    const bz = quaternion.components[2];
+    const bw = quaternion.components[3];
 
     this.x = aw * bx + ax * bw + ay * bz - az * by;
     this.y = aw * by - ax * bz + ay * bw + az * bx;
@@ -25,18 +30,15 @@ class Quaternion {
 
   public static clone(quaternion: Quaternion): Quaternion {
     return new Quaternion(
-      quaternion.x,
-      quaternion.y,
-      quaternion.z,
-      quaternion.w
+      quaternion.components[0],
+      quaternion.components[1],
+      quaternion.components[2],
+      quaternion.components[3]
     );
   }
 
   public copyFrom(quaternion: Quaternion): this {
-    this.components[0] = quaternion.components[0];
-    this.components[1] = quaternion.components[1];
-    this.components[2] = quaternion.components[2];
-    this.components[3] = quaternion.components[3];
+    this.components.set(quaternion.components);
 
     return this;
   }
@@ -55,10 +57,10 @@ class Quaternion {
 
     const scale = 1 / (magnitude * magnitude);
 
-    this.x *= -scale;
-    this.y *= -scale;
-    this.z *= -scale;
-    this.w *= scale;
+    this.components[0] *= -scale;
+    this.components[1] *= -scale;
+    this.components[2] *= -scale;
+    this.components[3] *= scale;
 
     return this;
   }

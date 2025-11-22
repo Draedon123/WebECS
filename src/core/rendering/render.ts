@@ -19,14 +19,9 @@ function render(
   renderPass: GPURenderPassEncoder
 ): void {
   const entityManager = EntityManager.getInstance();
-  const renderables = entityManager.queryMultiple({
-    type: "intersection",
-    queries: [
-      {
-        type: "singleMatch",
-        component: Parent,
-      },
-    ],
+  const renderables = entityManager.querySingular({
+    type: "singleMatch",
+    component: Parent,
   });
 
   for (let i = 0; i < renderables.length; i++) {
@@ -68,12 +63,7 @@ function render(
     const scale =
       entityManager.getComponent<Scale>(entity, "Scale") ?? undefined;
 
-    const bufferWriter = new BufferWriter(
-      resourceManager.transformByteLength,
-      undefined,
-      0
-    );
-
+    const bufferWriter = new BufferWriter(resourceManager.transformByteLength);
     const modelMatrix = calculateModelMatrix({ position, rotation, scale });
 
     if (parent !== null) {

@@ -29,8 +29,6 @@ async function main(): Promise<void> {
   );
   const plane = renderer.resourceManager.spawnModel("Plane");
 
-  console.log(renderer.resourceManager);
-
   entityManager.addComponent(plane, new Position(0, 0, 0));
   entityManager.addComponent(plane, new Scale(2));
   entityManager.addComponent(plane, new Rotation(0, 180, 0));

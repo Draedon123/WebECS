@@ -30,11 +30,25 @@ class VertexArray extends Component {
       return;
     }
 
-    const vertices = new Float32Array(
-      this.rawVertices
-        .map(({ position, uv, normal }) => [...position, ...uv, ...normal])
-        .flat()
-    );
+    const vertices = new Float32Array(this.rawVertices.length * (3 + 2 + 3));
+
+    for (
+      let i = 0, vertexCount = this.rawVertices.length;
+      i < vertexCount;
+      i++
+    ) {
+      const offset = i * (3 + 2 + 3);
+      const vertex = this.rawVertices[i];
+
+      vertices[offset + 0] = vertex.position.x;
+      vertices[offset + 1] = vertex.position.y;
+      vertices[offset + 2] = vertex.position.z;
+      vertices[offset + 3] = vertex.uv.x;
+      vertices[offset + 4] = vertex.uv.y;
+      vertices[offset + 5] = vertex.normal.x;
+      vertices[offset + 6] = vertex.normal.y;
+      vertices[offset + 7] = vertex.normal.z;
+    }
 
     this.vertexBuffer = device.createBuffer({
       label: `${this.label} Vertex Buffer`,
