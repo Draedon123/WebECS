@@ -23,6 +23,12 @@ struct AmbientLight {
   strength: f32,
 }
 
+struct DirectionalLight {
+  @align(16) direction: vec3f,
+  colour: vec3f,
+  intensity: f32,
+}
+
 struct PointLights {
   @align(16) count: u32,
   lights: array<PointLight>,
@@ -39,7 +45,8 @@ struct PointLight {
 @group(0) @binding(0) var <uniform> perspectiveViewMatrix: mat4x4f; 
 @group(0) @binding(1) var textureSampler: sampler;
 @group(0) @binding(2) var <uniform> ambientLight: AmbientLight;
-@group(0) @binding(3) var <storage, read> pointLights: PointLights;
+@group(0) @binding(3) var <uniform> directionalLight: DirectionalLight;
+@group(0) @binding(4) var <storage, read> pointLights: PointLights;
 
 @group(1) @binding(0) var <uniform> objectTransforms: ObjectTransforms;
 @group(1) @binding(1) var texture: texture_2d<f32>;
@@ -68,6 +75,8 @@ fn fragmentMain(input: VertexOutput) -> @location(0) vec4f {
     pointLightContribution += calculatePointLight(&pointLights.lights[i], input.normal, input.worldPosition.xyz);
   }
 
-  return vec4f((ambient + pointLightContribution) * textureColour, 1.0);
+  let directional = calculateDirectionalLight(input.normal, input.worldPosition.xyz);
+
+  return vec4f((ambient + pointLightContribution + directional) * textureColour, 1.0);
   // return vec4f(input.normal, 1.0);
 }
