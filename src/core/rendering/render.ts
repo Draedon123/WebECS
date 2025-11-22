@@ -1,4 +1,4 @@
-import { EntityManager } from "src/ecs";
+import { EntityManager, type Entity } from "src/ecs";
 import {
   calculateModelMatrix,
   calculateNormalMatrix,
@@ -27,94 +27,103 @@ function render(
   for (let i = 0; i < renderables.length; i++) {
     const entity = renderables[i];
 
-    const meshReference = entityManager.getComponent<MeshReference>(
-      entity,
-      "MeshReference"
-    ) as MeshReference;
+    renderObject(entity, i, resourceManager, device, renderPass);
+  }
+}
 
-    const mesh = resourceManager.getMesh(meshReference.meshKey);
+function renderObject(
+  entity: Entity,
+  objectIndex: number,
+  resourceManager: ResourceManager,
+  device: GPUDevice,
+  renderPass: GPURenderPassEncoder
+): void {
+  const entityManager = EntityManager.getInstance();
+  const meshReference = entityManager.getComponent<MeshReference>(
+    entity,
+    "MeshReference"
+  ) as MeshReference;
 
-    if (mesh === null) {
-      console.error(`No mesh found with key ${meshReference.meshKey}`);
-      continue;
-    }
+  const mesh = resourceManager.getMesh(meshReference.meshKey);
 
-    const textureReference = entityManager.getComponent<TextureReference>(
-      entity,
-      "TextureReference"
-    );
+  if (mesh === null) {
+    console.error(`No mesh found with key ${meshReference.meshKey}`);
+    return;
+  }
 
-    const textureKey =
-      textureReference?.textureKey ?? ResourceManager.DEFAULT_TEXTURE_KEY;
-    const texture = resourceManager.getTexture(textureKey);
+  const textureReference = entityManager.getComponent<TextureReference>(
+    entity,
+    "TextureReference"
+  );
 
-    if (texture === null) {
-      console.error(`No texture found with key ${textureKey}`);
-      continue;
-    }
+  const textureKey =
+    textureReference?.textureKey ?? ResourceManager.DEFAULT_TEXTURE_KEY;
+  const texture = resourceManager.getTexture(textureKey);
 
-    const parent =
-      entityManager.getComponent<Parent>(entity, "Parent")?.parent ?? null;
+  if (texture === null) {
+    console.error(`No texture found with key ${textureKey}`);
+    return;
+  }
 
+  const parent =
+    entityManager.getComponent<Parent>(entity, "Parent")?.parent ?? null;
+
+  const position =
+    entityManager.getComponent<Position>(entity, "Position") ?? undefined;
+  const rotation =
+    entityManager.getComponent<Rotation>(entity, "Rotation") ?? undefined;
+  const scale = entityManager.getComponent<Scale>(entity, "Scale") ?? undefined;
+
+  const bufferWriter = new BufferWriter(resourceManager.transformByteLength);
+  const modelMatrix = calculateModelMatrix({ position, rotation, scale });
+
+  if (parent !== null) {
     const position =
-      entityManager.getComponent<Position>(entity, "Position") ?? undefined;
+      entityManager.getComponent<Position>(parent, "Position") ?? undefined;
     const rotation =
-      entityManager.getComponent<Rotation>(entity, "Rotation") ?? undefined;
+      entityManager.getComponent<Rotation>(parent, "Rotation") ?? undefined;
     const scale =
-      entityManager.getComponent<Scale>(entity, "Scale") ?? undefined;
+      entityManager.getComponent<Scale>(parent, "Scale") ?? undefined;
 
-    const bufferWriter = new BufferWriter(resourceManager.transformByteLength);
-    const modelMatrix = calculateModelMatrix({ position, rotation, scale });
-
-    if (parent !== null) {
-      const position =
-        entityManager.getComponent<Position>(parent, "Position") ?? undefined;
-      const rotation =
-        entityManager.getComponent<Rotation>(parent, "Rotation") ?? undefined;
-      const scale =
-        entityManager.getComponent<Scale>(parent, "Scale") ?? undefined;
-
-      Matrix4.multiplyMatrices(
-        modelMatrix,
-        calculateModelMatrix({ position, rotation, scale }),
-        modelMatrix
-      );
-    }
-
-    const normalMatrix = calculateNormalMatrix(modelMatrix);
-
-    bufferWriter.writeMat4x4f(modelMatrix);
-    bufferWriter.writeMat3x3f(normalMatrix);
-
-    const bufferOffset =
-      i *
-      (resourceManager.transformByteLength + resourceManager.transformsPadding);
-    device.queue.writeBuffer(
-      resourceManager.transformsBuffer,
-      bufferOffset,
-      bufferWriter.buffer
+    Matrix4.multiplyMatrices(
+      modelMatrix,
+      calculateModelMatrix({ position, rotation, scale }),
+      modelMatrix
     );
+  }
 
-    renderPass.setVertexBuffer(0, mesh.vertices.vertexBuffer);
-    renderPass.setBindGroup(1, texture.bindGroup, [
-      i *
-        (resourceManager.transformByteLength +
-          resourceManager.transformsPadding),
-    ]);
+  const normalMatrix = calculateNormalMatrix(modelMatrix);
 
-    if (mesh.indices !== undefined) {
-      if (!mesh.indices.initialised) {
-        mesh.indices.initialise(device);
-      }
+  bufferWriter.writeMat4x4f(modelMatrix);
+  bufferWriter.writeMat3x3f(normalMatrix);
 
-      renderPass.setIndexBuffer(
-        mesh.indices.indexBuffer,
-        mesh.indices.indexFormat
-      );
-      renderPass.drawIndexed(mesh.indices.indexCount, 1);
-    } else {
-      renderPass.draw(mesh.vertices.vertexCount, 1);
+  const bufferOffset =
+    objectIndex *
+    (resourceManager.transformByteLength + resourceManager.transformsPadding);
+  device.queue.writeBuffer(
+    resourceManager.transformsBuffer,
+    bufferOffset,
+    bufferWriter.buffer
+  );
+
+  renderPass.setVertexBuffer(0, mesh.vertices.vertexBuffer);
+  renderPass.setBindGroup(1, texture.bindGroup, [
+    objectIndex *
+      (resourceManager.transformByteLength + resourceManager.transformsPadding),
+  ]);
+
+  if (mesh.indices !== undefined) {
+    if (!mesh.indices.initialised) {
+      mesh.indices.initialise(device);
     }
+
+    renderPass.setIndexBuffer(
+      mesh.indices.indexBuffer,
+      mesh.indices.indexFormat
+    );
+    renderPass.drawIndexed(mesh.indices.indexCount, 1);
+  } else {
+    renderPass.draw(mesh.vertices.vertexCount, 1);
   }
 }
 
