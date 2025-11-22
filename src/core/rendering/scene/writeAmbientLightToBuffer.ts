@@ -2,23 +2,22 @@ import { BufferWriter } from "src/core/gpu";
 import { EntityManager, type Entity } from "src/ecs";
 import { Vector3 } from "src/core/maths";
 import type { Light } from "./Light";
-
-const AMBIENT_LIGHT_BYTE_LENGTH = 4 * 4;
+import { AmbientLight } from "./AmbientLight";
 
 function writeAmbientLightToBuffer(
-  scene: Entity,
+  light: Entity,
   buffer: GPUBuffer,
   device: GPUDevice
 ): void {
   const lightComponent = EntityManager.getInstance().getComponent<Light>(
-    scene,
-    "AmbientLight"
+    light,
+    "Light"
   );
 
   const colour = lightComponent?.colour ?? new Vector3(0, 0, 0);
   const intensity = lightComponent?.intensity ?? 0;
 
-  const bufferWriter = new BufferWriter(AMBIENT_LIGHT_BYTE_LENGTH);
+  const bufferWriter = new BufferWriter(AmbientLight.byteLength);
 
   bufferWriter.writeVec3f(Vector3.scale(colour, 1 / 255));
   bufferWriter.writeFloat32(intensity);
