@@ -1,17 +1,13 @@
 import { EntityManager, type Entity } from "src/ecs";
-import {
-  calculateModelMatrix,
-  calculateNormalMatrix,
-  Position,
-  Rotation,
-  Scale,
-} from "../transforms";
-import { BufferWriter } from "../gpu";
+import { Position, Rotation, Scale } from "../transforms";
 import { ResourceManager } from "../ResourceManager";
 import { MeshReference } from "../meshes/MeshReference";
 import { TextureReference } from "./TextureReference";
 import { Parent } from "src/ecs/Parent";
 import { Matrix4 } from "../maths";
+import { BufferWriter } from "../gpu/BufferWriter";
+import { calculateModelMatrix } from "../transforms/calculateModelMatrix";
+import { calculateNormalMatrix } from "../transforms/calculateNormalMatrix";
 
 function render(
   resourceManager: ResourceManager,

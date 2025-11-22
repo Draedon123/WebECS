@@ -1,9 +1,9 @@
-import { BufferWriter } from "src/core/gpu";
 import { EntityManager, type Entity } from "src/ecs";
 import type { Light } from "./Light";
 import { Position } from "src/core/transforms";
 import { Vector3 } from "src/core/maths";
 import { PointLight } from "./PointLight";
+import type { BufferWriter } from "src/core/gpu/BufferWriter";
 
 function writePointLightToBuffer(light: Entity, buffer: BufferWriter): void {
   const entityManger = EntityManager.getInstance();

@@ -1,14 +1,10 @@
 import { EntityManager, type Entity } from "src/ecs";
-import {
-  loadObj,
-  MeshReference,
-  type IndexArray,
-  type VertexArray,
-} from "./meshes";
+import { MeshReference, type IndexArray, type VertexArray } from "./meshes";
 import { Texture, TextureReference, type Renderer } from "./rendering";
 import { Children } from "src/ecs/Children";
 import { Parent } from "src/ecs/Parent";
 import { roundUp } from "./maths";
+import { loadObj } from "./meshes/loaders/obj";
 
 type TextureEntry = {
   texture: Texture;

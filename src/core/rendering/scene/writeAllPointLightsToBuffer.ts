@@ -2,8 +2,8 @@ import { EntityManager } from "src/ecs";
 import { Light } from "./Light";
 import { Position } from "src/core/transforms";
 import { PointLight } from "./PointLight";
-import { BufferWriter } from "src/core/gpu";
 import { writePointLightToBuffer } from "./writePointLightToBuffer";
+import { BufferWriter } from "src/core/gpu/BufferWriter";
 
 function writeAllPointLightsToBuffer(
   buffer: GPUBuffer,

@@ -1,6 +1,7 @@
 import { Component } from "src/ecs";
 import { Matrix4, toDegrees, toRadians } from "../maths";
-import { calculateModelMatrix, Position, Rotation } from "../transforms";
+import { Position, Rotation } from "../transforms";
+import { calculateModelMatrix } from "../transforms/calculateModelMatrix";
 
 type PerspectiveCameraOptions = {
   /** degrees */

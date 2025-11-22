@@ -1,8 +1,8 @@
-import { BufferWriter } from "src/core/gpu";
 import { EntityManager, type Entity } from "src/ecs";
 import { Vector3 } from "src/core/maths";
 import type { Light } from "./Light";
 import { AmbientLight } from "./AmbientLight";
+import { BufferWriter } from "src/core/gpu/BufferWriter";
 
 function writeAmbientLightToBuffer(
   light: Entity,
