@@ -97,7 +97,11 @@ class ResourceManager {
   }
 
   public getTexture(key: string): TextureEntry | null {
-    return this.textures[key] ?? null;
+    return (
+      this.textures[key] ??
+      this.textures[ResourceManager.DEFAULT_TEXTURE_KEY] ??
+      null
+    );
   }
 
   public addMesh(key: string, mesh: MeshEntry): void;

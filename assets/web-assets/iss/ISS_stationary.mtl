@@ -1,0 +1,353 @@
+# MTL file - created by a modified js OBJExporter
+
+newmtl ISS_03_dull
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pr 0.75
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd ISS_03_dull.png
+
+newmtl ISS_AO_06
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pm 0.5
+Pr 0.44999998807907104
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd ISS_AO_06.png
+
+newmtl ISS_01_dull
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pm 0.25
+Pr 0.5
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd ISS_01_dull.png
+
+newmtl ISS_02_dull
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pm 0.5
+Pr 0.6000000238418579
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd ISS_02_dull.png
+
+newmtl shiny_panel
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pm 0.25
+Pr 0.1599999964237213
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd ISS_02_dull.png
+
+newmtl olive_*
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pm 1
+Pr 0.30000001192092896
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 0.2395523190498352 0.2265775203704834 0.16225877404212952
+Ke 0 0 0
+
+newmtl material186
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pm 1
+Pr 1
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+
+newmtl ISS_AO_02
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pm 1
+Pr 0.44999998807907104
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd ISS_AO_02.png
+
+newmtl ISS_AO_04
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pm 0.5
+Pr 0.44999998807907104
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd ISS_AO_04.png
+
+newmtl ISS_AO_01
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pm 0.5
+Pr 0.44999998807907104
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd ISS_AO_01.png
+
+newmtl ISS_AO_03
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pm 0.5
+Pr 0.44999998807907104
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd ISS_AO_03.png
+
+newmtl ISS_01_shiny_n
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pm 0.5
+Pr 0.44999998807907104
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd ISS_01_dull.png
+norm normalMap12.png
+
+newmtl ISS_01_dark_*
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pr 0.5
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd ISS_01_dull.png
+
+newmtl foil_silver
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pm 1
+Pr 0.30000001192092896
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+norm normalMap14.png
+
+newmtl ISS_AO_05
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pm 0.5
+Pr 0.44999998807907104
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd ISS_AO_05.png
+
+newmtl ISS_04_dull
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pr 0.5
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd ISS_04_dull.png
+
+newmtl ISS_02_dark_*
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pr 0.5
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd ISS_02_dull.png
+
+newmtl ISS_AO_07
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pm 0.5
+Pr 0.44999998807907104
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd ISS_AO_07.png
+
+newmtl ISS_AO_08
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pm 0.5
+Pr 0.44999998807907104
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd ISS_AO_08.png
+
+newmtl ISS_03_shiny_n
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pm 0.5
+Pr 0.44999998807907104
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd ISS_03_dull.png
+norm normalMap20.png
+
+newmtl white
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pr 0.8500000238418579
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 0.49693313241004944 0.4969329833984375 0.4969330132007599
+Ke 0 0 0
+norm normalMap21.png
+
+newmtl base_metal
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pm 1
+Pr 1
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 0.3185468018054962 0.31425797939300537 0.25295013189315796
+Ke 0 0 0
+
+newmtl ISS_03_dull.001
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pm 1
+Pr 0.6732679605484009
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd ISS_03_dull.001.png
+
+newmtl ecostress
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pr 0.75
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd ecostress.png
+
+newmtl plastic_black
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pr 0.5
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 0.026453394442796707 0.026453394442796707 0.026453394442796707
+Ke 0 0 0
+
+newmtl ecostressWhite
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pr 0.5
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+
+newmtl ISS_03_dull.002
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pr 0.75
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd ISS_03_dull.002.png
+
+newmtl ecostress_metal
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pm 0.6000000238418579
+Pr 0.75
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd ecostress.png
