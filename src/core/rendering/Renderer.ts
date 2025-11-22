@@ -2,12 +2,13 @@ import { Shader } from "./Shader";
 import { render } from "./render";
 import { ResourceManager } from "../ResourceManager";
 import { writePerspectiveViewMatrixToBuffer } from "../cameras/writePerspectiveViewMatrixToBuffer";
-import type { Entity } from "src/ecs";
+import { EntityManager, type Entity } from "src/ecs";
 import { writeAmbientLightToBuffer } from "./scene/writeAmbientLightToBuffer";
 import { PointLight } from "./scene/PointLight";
 import { writeAllPointLightsToBuffer } from "./scene/writeAllPointLightsToBuffer";
 import { SkyboxRenderer } from "./SkyboxRenderer";
 import { getPerspectiveViewMatrixToBuffer } from "../cameras/getPerspectiveViewMatrix";
+import type { PerspectiveCamera } from "../cameras";
 
 type RendererSettings = {
   clearColour: GPUColor;
@@ -257,6 +258,13 @@ class Renderer {
         depthClearValue: 1,
       },
     });
+
+    (
+      EntityManager.getInstance().getComponent(
+        camera,
+        "PerspectiveCamera"
+      ) as PerspectiveCamera
+    ).aspectRatio = this.canvas.width / this.canvas.height;
 
     writePerspectiveViewMatrixToBuffer(
       camera,

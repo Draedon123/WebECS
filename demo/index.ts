@@ -86,8 +86,6 @@ async function main(): Promise<void> {
   const loop = new Loop();
 
   loop.addCallback((frame) => {
-    cameraComponent.aspectRatio = canvas.width / canvas.height;
-
     cameraPosition.x = 10 * Math.sin(frame.totalTime * 3e-4);
     cameraPosition.z = 10 * Math.cos(frame.totalTime * 3e-4);
 
