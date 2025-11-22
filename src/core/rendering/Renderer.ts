@@ -9,6 +9,9 @@ import { writeAllPointLightsToBuffer } from "./scene/writeAllPointLightsToBuffer
 import { SkyboxRenderer } from "./SkyboxRenderer";
 import { getPerspectiveViewMatrixToBuffer } from "../cameras/getPerspectiveViewMatrix";
 import type { PerspectiveCamera } from "../cameras";
+import { writeDirectionalLightToBuffer } from "./scene/writeDirectionalLightToBuffer";
+import { AmbientLight, Light } from "./scene";
+import { DirectionalLight } from "./scene/DirectionalLight";
 
 type RendererSettings = {
   clearColour: GPUColor;
@@ -33,6 +36,7 @@ class Renderer {
   public readonly perObjectBindGroupLayout: GPUBindGroupLayout;
   private readonly perspectiveViewMatrixBuffer: GPUBuffer;
   private readonly ambientLightBuffer: GPUBuffer;
+  private readonly directionalLightBuffer: GPUBuffer;
   private readonly pointLightsBuffer: GPUBuffer;
   private readonly sampler: GPUSampler;
 
@@ -68,6 +72,12 @@ class Renderer {
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
+    this.directionalLightBuffer = device.createBuffer({
+      label: "Renderer Directional Light Buffer",
+      size: 8 * 4,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+
     this.pointLightsBuffer = device.createBuffer({
       label: "Renderer Point Lights Buffer",
       size: 4 * 4 + PointLight.byteLength * this.settings.maxPointLights,
@@ -89,7 +99,7 @@ class Renderer {
         },
       ],
     });
-    this.resourceManager = new ResourceManager(this, device, 128);
+    this.resourceManager = new ResourceManager(this, device, 512);
 
     this.depthTexture = this.createDepthTexture();
     this.sampler = device.createSampler();
@@ -152,6 +162,11 @@ class Renderer {
         },
         {
           binding: 3,
+          buffer: { type: "uniform" },
+          visibility: GPUShaderStage.FRAGMENT,
+        },
+        {
+          binding: 4,
           buffer: { type: "read-only-storage" },
           visibility: GPUShaderStage.FRAGMENT,
         },
@@ -176,6 +191,10 @@ class Renderer {
         },
         {
           binding: 3,
+          resource: { buffer: this.directionalLightBuffer },
+        },
+        {
+          binding: 4,
           resource: { buffer: this.pointLightsBuffer },
         },
       ],
@@ -240,7 +259,7 @@ class Renderer {
     );
   }
 
-  public render(scene: Entity, camera: Entity): void {
+  public render(camera: Entity): void {
     const encoder = this.device.createCommandEncoder();
     const renderPass = encoder.beginRenderPass({
       colorAttachments: [
@@ -272,7 +291,27 @@ class Renderer {
       this.device
     );
 
-    writeAmbientLightToBuffer(scene, this.ambientLightBuffer, this.device);
+    const entityManager = EntityManager.getInstance();
+    const ambientLight = entityManager.querySingular({
+      type: "intersection",
+      components: [Light, AmbientLight],
+    });
+    const directionalLight = entityManager.querySingular({
+      type: "intersection",
+      components: [Light, DirectionalLight],
+    });
+
+    writeAmbientLightToBuffer(
+      ambientLight[0],
+      this.ambientLightBuffer,
+      this.device
+    );
+    writeDirectionalLightToBuffer(
+      directionalLight[0],
+      this.directionalLightBuffer,
+      this.device
+    );
+
     writeAllPointLightsToBuffer(this.pointLightsBuffer, this.device);
     this.skyboxRenderer.render(
       this.resourceManager,
