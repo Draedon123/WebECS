@@ -36,7 +36,7 @@ async function main(): Promise<void> {
   );
 
   await renderer.resourceManager.loadModel(
-    import.meta.env.BASE_URL + "/web-assets/iss/ISS_stationary.obj",
+    import.meta.env.BASE_URL + "/web-assets/iss/ISS_stationary.obj.gz",
     "ISS",
     "obj"
   );
@@ -82,13 +82,14 @@ async function main(): Promise<void> {
     "Volcanic",
   ];
 
-  for (const planet of planetTextures) {
-    const texture = await Texture.fetch([
-      import.meta.env.BASE_URL + `/web-assets/planets/${planet}.png`,
-    ]);
-    renderer.resourceManager.addTexture(planet, texture);
-  }
-  console.log(renderer.resourceManager);
+  await Promise.all(
+    planetTextures.map(async (planet) => {
+      const texture = await Texture.fetch([
+        import.meta.env.BASE_URL + `/web-assets/planets/${planet}.png`,
+      ]);
+      renderer.resourceManager.addTexture(planet, texture);
+    })
+  );
 
   const sphereMesh = createSphereMesh(7, 1);
   renderer.resourceManager.addMesh(

@@ -3,6 +3,7 @@ import { VertexArray, type Vertex } from "../VertexArray";
 import { IndexArray } from "../IndexArray";
 import type { MeshEntry } from "src/core/ResourceManager";
 import { Texture } from "src/core/rendering";
+import { gunzipSync, strFromU8 } from "fflate";
 
 type Material = {
   name: string;
@@ -18,7 +19,15 @@ async function loadObj(filePath: string): Promise<{
   meshes: Mesh[];
   materials: Material[];
 }> {
-  const fileContents = await (await fetch(filePath)).text();
+  let fileContents: string;
+  if (filePath.endsWith(".gz")) {
+    const data = await (await fetch(filePath)).arrayBuffer();
+    const decompressed = gunzipSync(new Uint8Array(data));
+    fileContents = strFromU8(decompressed);
+  } else {
+    fileContents = await (await fetch(filePath)).text();
+  }
+
   const lines = fileContents.split(/[\r\n]+/);
 
   let vertices: Vertex[] = [];
@@ -167,6 +176,7 @@ async function loadMtl(filePath: string): Promise<Material[]> {
   const fileContents = await (await fetch(filePath)).text();
   const rawMaterialsData = fileContents.split(/(newmtl)/);
   const materials: Material[] = [];
+  const texturePromises: Promise<void>[] = [];
 
   for (let i = 0; i < rawMaterialsData.length; i++) {
     if (!rawMaterialsData[i - 1]?.startsWith("newmtl")) {
@@ -202,13 +212,18 @@ async function loadMtl(filePath: string): Promise<Material[]> {
             filePath.split("/").slice(0, -1).join("/") +
             "/" +
             parts.slice(1).join(" ");
-          const texture = await Texture.fetch([url]);
+          texturePromises.push(
+            Texture.fetch([url]).then((texture) => {
+              material.texture = texture;
+            })
+          );
 
-          material.texture = texture;
           break;
         }
       }
     }
+
+    await Promise.all(texturePromises);
 
     if (!material.texture) {
       material.texture = Texture.colour(255, 255, 255);
