@@ -8,7 +8,6 @@ import {
   Loop,
   MeshReference,
   PerspectiveCamera,
-  PointLight,
   Position,
   Renderer,
   Rotation,
@@ -48,11 +47,11 @@ async function main(): Promise<void> {
   entityManager.addComponent(iss, issRotation);
 
   entityManager.createEntity(
-    new Light(new Vector3(255, 255, 255), 0.2),
+    new Light(new Vector3(255, 255, 255), 0.15),
     new AmbientLight()
   );
   entityManager.createEntity(
-    new Light(new Vector3(255, 255, 255), 0.4),
+    new Light(new Vector3(255, 255, 255), 0.5),
     new DirectionalLight(new Vector3(0, 1, 0))
   );
 
@@ -98,20 +97,21 @@ async function main(): Promise<void> {
     sphereMesh.indices
   );
 
-  const ASTEROID_COUNT = 20;
+  const PLANET_COUNT = 80;
 
-  for (let i = 0; i < ASTEROID_COUNT; i++) {
+  for (let i = 0; i < PLANET_COUNT; i++) {
+    const theta = random(0, Math.PI * 2);
+    const radius = random(30, 80);
+
+    const x = radius * Math.cos(theta);
+    const z = radius * Math.sin(theta);
+
     entityManager.createEntity(
       new MeshReference("Sphere"),
       new TextureReference(
         planetTextures[Math.floor(random(0, planetTextures.length))]
       ),
-      new Position(
-        Math.sign(Math.random() - 0.5) * random(10, 50),
-        Math.sign(Math.random() - 0.5) * random(-10, 10),
-        Math.sign(Math.random() - 0.5) * random(10, 50)
-      ),
-      // new Scale(random(0.3, 0.5)),
+      new Position(x, random(-30, 15), z),
       new Rotation(random(0, 360), random(0, 360), random(0, 360))
     );
   }
@@ -119,12 +119,6 @@ async function main(): Promise<void> {
   function random(min: number, max: number): number {
     return (max - min) * Math.random() + min;
   }
-
-  entityManager.createEntity(
-    new Light(new Vector3(255, 255, 255), 0.3),
-    new PointLight(100, 0),
-    cameraPosition
-  );
 
   const loop = new Loop();
 
@@ -152,4 +146,18 @@ async function main(): Promise<void> {
   loop.start();
 }
 
-main();
+main().catch((error) => {
+  const errorMessage =
+    error instanceof Error ? error.message : JSON.stringify(error);
+
+  const errorContainer = document.getElementById("error") as HTMLElement;
+  const errorMessageElement = document.getElementById(
+    "error-message"
+  ) as HTMLElement;
+
+  errorContainer.style.zIndex = "999";
+  errorMessageElement.textContent = errorMessage;
+
+  const iframe = document.querySelector("iframe") as HTMLIFrameElement;
+  iframe.src = "https://www.youtube.com/embed/6vH1kX_Rii4";
+});

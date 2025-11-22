@@ -333,14 +333,14 @@ class Renderer {
     settings: Partial<RendererSettings> = {}
   ): Promise<Renderer> {
     if (!("gpu" in navigator)) {
-      throw new Error("WebGPU not supported");
+      throw new Error("WebGPU not supported by your device/browser");
     }
 
     const adapter = await navigator.gpu.requestAdapter();
 
     if (adapter === null) {
       throw new Error(
-        "Could not find suitable GPU Adapter. Maybe your browser doesn't support WebGPU?"
+        "Could not find suitable GPU Adapter. Maybe your device/browser doesn't support WebGPU?"
       );
     }
 
@@ -350,7 +350,7 @@ class Renderer {
 
     if (device === null) {
       throw new Error(
-        "Could not find suitable GPU Device. Maybe your browser doesn't support WebGPU?"
+        "Could not find suitable GPU Device. Maybe your device/browser doesn't support WebGPU?"
       );
     }
 

@@ -4,21 +4,41 @@ body {
 }
 
 canvas,
-#loading {
+#loading,
+#error {
   width: 100vw;
   height: 100vh;
 }
 
-#loading {
+#loading,
+#error {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 999;
 
-  background-color: #e7dedc;
-  color: #000;
   font-size: xx-large;
 
-  text-align: center;
-  align-content: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#loading {
+  background-color: #e7dedc;
+  color: #000;
+  z-index: 998;
+}
+
+#error {
+  background-color: #000;
+  color: #f00;
+  z-index: -1;
+}
+
+iframe {
+  z-index: 2;
+
+  width: 50%;
+  aspect-ratio: 1920 / 1080;
 }
