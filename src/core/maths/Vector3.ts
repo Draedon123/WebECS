@@ -57,6 +57,14 @@ class Vector3 {
     );
   }
 
+  public static scale(vector3: Vector3, factor: number): Vector3 {
+    return new Vector3(
+      vector3.components[0] * factor,
+      vector3.components[1] * factor,
+      vector3.components[2] * factor
+    );
+  }
+
   public scale(factor: number): this {
     this.components[0] *= factor;
     this.components[1] *= factor;
