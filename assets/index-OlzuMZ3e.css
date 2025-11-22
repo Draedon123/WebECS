@@ -1,0 +1,1 @@
+body{margin:0;overflow:hidden}#error,#loading,canvas{width:100vw;height:100vh}#error,#loading{position:absolute;top:0;left:0;font-size:xx-large;display:flex;flex-direction:column;justify-content:center;align-items:center}#loading{background-color:#e7dedc;color:#000;z-index:998}#error{background-color:#000;color:red;z-index:-1}iframe{z-index:2;width:50%;aspect-ratio:1920/1080}
