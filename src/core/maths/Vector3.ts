@@ -73,6 +73,10 @@ class Vector3 {
     return this;
   }
 
+  public static normalise(vector3: Vector3): Vector3 {
+    return vector3.clone().normalise();
+  }
+
   public normalise(): this {
     const magnitude = this.magnitude;
 
