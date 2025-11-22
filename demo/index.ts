@@ -1,7 +1,9 @@
 import {
   EntityManager,
+  Light,
   lookAt,
   PerspectiveCamera,
+  PointLight,
   Position,
   Renderer,
   Rotation,
@@ -36,6 +38,17 @@ async function main(): Promise<void> {
   entityManager.addComponent(plane, new Scale(2));
   entityManager.addComponent(plane, new Rotation(0, 180, 0));
 
+  entityManager.createEntity(
+    new Light(new Vector3(255, 255, 255), 5e5),
+    new PointLight(),
+    new Position(5, 5, 5)
+  );
+
+  entityManager.createEntity(
+    new Light(new Vector3(255, 255, 255), 5e5),
+    new PointLight(),
+    new Position(-5, 5, -5)
+  );
   const scene = entityManager.createEntity();
 
   const start = Date.now();

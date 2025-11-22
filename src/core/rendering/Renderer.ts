@@ -4,9 +4,12 @@ import { ResourceManager } from "../ResourceManager";
 import { writePerspectiveViewMatrixToBuffer } from "../cameras/writePerspectiveViewMatrixToBuffer";
 import type { Entity } from "src/ecs";
 import { writeAmbientLightToBuffer } from "./scene/writeAmbientLightToBuffer";
+import { PointLight } from "./scene/PointLight";
+import { writeAllPointLightsToBuffer } from "./scene/writeAllPointLightsToBuffer";
 
 type RendererSettings = {
   clearColour: GPUColor;
+  readonly maxPointLights: number;
 };
 
 class Renderer {
@@ -26,6 +29,7 @@ class Renderer {
   public readonly perObjectBindGroupLayout: GPUBindGroupLayout;
   private readonly perspectiveViewMatrixBuffer: GPUBuffer;
   private readonly ambientLightBuffer: GPUBuffer;
+  private readonly pointLightsBuffer: GPUBuffer;
   private readonly sampler: GPUSampler;
 
   private constructor(
@@ -45,6 +49,7 @@ class Renderer {
     this.canvasFormat = "rgba8unorm";
     this.settings = {
       clearColour: settings.clearColour ?? [0, 0, 0, 1],
+      maxPointLights: settings.maxPointLights ?? 32,
     };
 
     this.perspectiveViewMatrixBuffer = device.createBuffer({
@@ -57,6 +62,12 @@ class Renderer {
       label: "Renderer Ambient Light Buffer",
       size: 4 * 4,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+
+    this.pointLightsBuffer = device.createBuffer({
+      label: "Renderer Point Lights Buffer",
+      size: 4 * 4 + PointLight.byteLength * this.settings.maxPointLights,
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
     });
 
     this.perObjectBindGroupLayout = this.device.createBindGroupLayout({
@@ -135,6 +146,11 @@ class Renderer {
           buffer: { type: "uniform" },
           visibility: GPUShaderStage.FRAGMENT,
         },
+        {
+          binding: 3,
+          buffer: { type: "read-only-storage" },
+          visibility: GPUShaderStage.FRAGMENT,
+        },
       ],
     });
 
@@ -153,6 +169,10 @@ class Renderer {
         {
           binding: 2,
           resource: { buffer: this.ambientLightBuffer },
+        },
+        {
+          binding: 3,
+          resource: { buffer: this.pointLightsBuffer },
         },
       ],
     });
@@ -237,6 +257,7 @@ class Renderer {
     );
 
     writeAmbientLightToBuffer(scene, this.ambientLightBuffer, this.device);
+    writeAllPointLightsToBuffer(this.pointLightsBuffer, this.device);
 
     renderPass.setPipeline(this.renderPipeline);
     renderPass.setBindGroup(0, this.bindGroup0);
