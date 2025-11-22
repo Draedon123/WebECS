@@ -22,7 +22,10 @@ async function loadObj(filePath: string): Promise<{
   let fileContents: string;
   if (filePath.endsWith(".gz")) {
     const data = await (await fetch(filePath)).arrayBuffer();
-    const decompressed = gunzipSync(new Uint8Array(data));
+    // my dev server automatically ungzips the file...
+    const decompressed = import.meta.env.DEV
+      ? new Uint8Array(data)
+      : gunzipSync(new Uint8Array(data));
     fileContents = strFromU8(decompressed);
   } else {
     fileContents = await (await fetch(filePath)).text();
