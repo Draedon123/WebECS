@@ -3,6 +3,7 @@ import {
   EntityManager,
   Light,
   lookAt,
+  Loop,
   MeshReference,
   PerspectiveCamera,
   PointLight,
@@ -82,20 +83,20 @@ async function main(): Promise<void> {
   renderer.resourceManager.addTexture("Skybox", skyboxTexture);
   entityManager.createEntity(new Skybox(), new TextureReference("Skybox"));
 
-  const start = Date.now();
-  function render() {
+  const loop = new Loop();
+
+  loop.addCallback((frame) => {
     cameraComponent.aspectRatio = canvas.width / canvas.height;
 
-    cameraPosition.x = 10 * Math.sin((Date.now() - start) * 3e-4);
-    cameraPosition.z = 10 * Math.cos((Date.now() - start) * 3e-4);
+    cameraPosition.x = 10 * Math.sin(frame.totalTime * 3e-4);
+    cameraPosition.z = 10 * Math.cos(frame.totalTime * 3e-4);
 
     lookAt(camera, new Vector3(0, 0, 0));
 
     renderer.render(scene, camera);
-    requestAnimationFrame(render);
-  }
+  });
 
-  render();
+  loop.start();
 }
 
 main();
