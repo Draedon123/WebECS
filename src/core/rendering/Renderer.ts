@@ -3,6 +3,7 @@ import { render } from "./render";
 import { ResourceManager } from "../ResourceManager";
 import { writePerspectiveViewMatrixToBuffer } from "../cameras/writePerspectiveViewMatrixToBuffer";
 import type { Entity } from "src/ecs";
+import { writeAmbientLightToBuffer } from "./scene/writeAmbientLightToBuffer";
 
 type RendererSettings = {
   clearColour: GPUColor;
@@ -24,6 +25,7 @@ class Renderer {
   public readonly resourceManager: ResourceManager;
   public readonly perObjectBindGroupLayout: GPUBindGroupLayout;
   private readonly perspectiveViewMatrixBuffer: GPUBuffer;
+  private readonly ambientLightBuffer: GPUBuffer;
   private readonly sampler: GPUSampler;
 
   private constructor(
@@ -48,6 +50,12 @@ class Renderer {
     this.perspectiveViewMatrixBuffer = device.createBuffer({
       label: "Perspective View Matrix Buffer",
       size: 16 * 4,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+
+    this.ambientLightBuffer = device.createBuffer({
+      label: "Renderer Ambient Light Buffer",
+      size: 4 * 4,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
@@ -122,6 +130,11 @@ class Renderer {
           sampler: {},
           visibility: GPUShaderStage.FRAGMENT,
         },
+        {
+          binding: 2,
+          buffer: { type: "uniform" },
+          visibility: GPUShaderStage.FRAGMENT,
+        },
       ],
     });
 
@@ -136,6 +149,10 @@ class Renderer {
         {
           binding: 1,
           resource: this.sampler,
+        },
+        {
+          binding: 2,
+          resource: { buffer: this.ambientLightBuffer },
         },
       ],
     });
@@ -194,7 +211,7 @@ class Renderer {
     });
   }
 
-  public render(camera: Entity): void {
+  public render(scene: Entity, camera: Entity): void {
     const encoder = this.device.createCommandEncoder();
     const renderPass = encoder.beginRenderPass({
       colorAttachments: [
@@ -218,6 +235,8 @@ class Renderer {
       this.perspectiveViewMatrixBuffer,
       this.device
     );
+
+    writeAmbientLightToBuffer(scene, this.ambientLightBuffer, this.device);
 
     renderPass.setPipeline(this.renderPipeline);
     renderPass.setBindGroup(0, this.bindGroup0);

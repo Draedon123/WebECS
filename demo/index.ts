@@ -36,6 +36,8 @@ async function main(): Promise<void> {
   entityManager.addComponent(plane, new Scale(2));
   entityManager.addComponent(plane, new Rotation(0, 180, 0));
 
+  const scene = entityManager.createEntity();
+
   const start = Date.now();
   function render() {
     cameraComponent.aspectRatio = canvas.width / canvas.height;
@@ -45,7 +47,7 @@ async function main(): Promise<void> {
 
     lookAt(camera, new Vector3(0, 0, 0));
 
-    renderer.render(camera);
+    renderer.render(scene, camera);
     requestAnimationFrame(render);
   }
 
