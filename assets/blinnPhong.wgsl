@@ -10,6 +10,7 @@ struct VertexOutput {
   @builtin(position) position: vec4f,
   @location(0) uv: vec2f,
   @location(1) normal: vec3f,
+  @location(2) worldPosition: vec4f,
 }
 
 struct ObjectTransforms {
@@ -31,6 +32,8 @@ struct PointLight {
   @align(16) position: vec3f,
   colour: vec3f,
   intensity: f32,
+  maxDistance: f32,
+  decayRate: f32,
 }
 
 @group(0) @binding(0) var <uniform> perspectiveViewMatrix: mat4x4f; 
@@ -45,7 +48,8 @@ struct PointLight {
 fn vertexMain(vertex: Vertex) -> VertexOutput {
   var output: VertexOutput;
 
-  output.position = perspectiveViewMatrix * objectTransforms.modelMatrix * vec4f(vertex.position, 1.0);
+  output.worldPosition = objectTransforms.modelMatrix * vec4f(vertex.position, 1.0);
+  output.position = perspectiveViewMatrix * output.worldPosition;
   output.uv = vertex.uv;
   output.normal = normalize(objectTransforms.normalMatrix * vertex.normal);
 
@@ -61,7 +65,7 @@ fn fragmentMain(input: VertexOutput) -> @location(0) vec4f {
   var pointLightContribution: vec3f = vec3f(0.0);
 
   for(var i: u32 = 0; i < pointLights.count; i++){
-    pointLightContribution += calculatePointLight(&pointLights.lights[i], input.normal, input.position.xyz);
+    pointLightContribution += calculatePointLight(&pointLights.lights[i], input.normal, input.worldPosition.xyz);
   }
 
   return vec4f((ambient + pointLightContribution) * textureColour, 1.0);

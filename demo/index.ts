@@ -39,15 +39,15 @@ async function main(): Promise<void> {
   entityManager.addComponent(plane, new Rotation(0, 180, 0));
 
   entityManager.createEntity(
-    new Light(new Vector3(255, 255, 255), 5e5),
-    new PointLight(),
-    new Position(5, 5, 5)
+    new Light(new Vector3(255, 255, 255), 10),
+    new PointLight(10, 1.5),
+    new Position(-5, -0.5, 0)
   );
 
   entityManager.createEntity(
-    new Light(new Vector3(255, 255, 255), 5e5),
-    new PointLight(),
-    new Position(-5, 5, -5)
+    new Light(new Vector3(255, 255, 255), 5),
+    new PointLight(10, 2.5),
+    new Position(1, 6, 2)
   );
   const scene = entityManager.createEntity();
 
