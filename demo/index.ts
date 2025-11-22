@@ -1,13 +1,13 @@
-import { MeshReference } from "src/core/meshes/MeshReference";
-import { TextureReference } from "src/core/rendering/TextureReference";
-// import { Texture } from "src/core/rendering/Texture";
 import {
   EntityManager,
   loadObj,
+  MeshReference,
   PerspectiveCamera,
   Position,
   Renderer,
   Rotation,
+  TextureReference,
+  // Texture
 } from "webecs";
 
 async function main(): Promise<void> {
