@@ -79,6 +79,14 @@ class Matrix4 {
     return out;
   }
 
+  public static copyFrom(matrix: Matrix4): Matrix4 {
+    const copied = new Matrix4();
+
+    copied.components.set(matrix.components);
+
+    return copied;
+  }
+
   public static perspective(
     fieldOfViewRadians: number,
     aspectRatio: number,

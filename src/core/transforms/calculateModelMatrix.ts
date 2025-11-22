@@ -34,7 +34,6 @@ function calculateModelMatrix(object: Transformable): Matrix4 {
     const scale = Matrix4.fromScale(object.scale);
     Matrix4.multiplyMatrices(modelMatrix, scale, modelMatrix);
   }
-
   return modelMatrix;
 }
 

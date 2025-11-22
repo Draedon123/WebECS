@@ -9,7 +9,7 @@ function calculateNormalMatrix(
 ): Matrix3 {
   const modelMatrix =
     objectOrModelMatrix instanceof Matrix4
-      ? objectOrModelMatrix
+      ? Matrix4.copyFrom(objectOrModelMatrix)
       : calculateModelMatrix(objectOrModelMatrix);
   const inverseModelMatrix = Matrix3.fromMatrix4(modelMatrix.invert());
   const normalMatrix = inverseModelMatrix.transpose();
