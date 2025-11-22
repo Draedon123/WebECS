@@ -1,5 +1,6 @@
 import { MeshReference } from "src/core/meshes/MeshReference";
-import { Texture } from "src/core/rendering/Texture";
+import { TextureReference } from "src/core/rendering/TextureReference";
+// import { Texture } from "src/core/rendering/Texture";
 import {
   EntityManager,
   loadObj,
@@ -24,19 +25,26 @@ async function main(): Promise<void> {
     new Rotation(0, 0, 0)
   );
 
-  const diamondOreTexture = await Texture.fetch(
-    import.meta.env.BASE_URL + "/web-assets/diamond_ore.png"
-  );
+  // const diamondOreTexture = await Texture.fetch(
+  //   import.meta.env.BASE_URL + "/web-assets/diamond_ore.png"
+  // );
 
-  const teapotMesh = await loadObj(
+  const teapot = await loadObj(
     import.meta.env.BASE_URL + "/web-assets/teapot.obj"
   );
 
-  renderer.resourceManager.addTexture("diamond_ore", diamondOreTexture);
-  renderer.resourceManager.addMesh("Teapot", teapotMesh);
+  // renderer.resourceManager.addTexture("diamond_ore", diamondOreTexture);
+  renderer.resourceManager.addMesh("Teapot", teapot.mesh);
+  for (const material of Object.values(teapot.materials)) {
+    renderer.resourceManager.addTexture(material.name, material.texture);
+  }
 
   const teapotRotation = new Rotation(0, 0, 0);
-  entityManager.createEntity(new MeshReference("Teapot"), teapotRotation);
+  entityManager.createEntity(
+    new MeshReference("Teapot"),
+    new TextureReference("FrontColor"),
+    teapotRotation
+  );
 
   function render() {
     cameraComponent.aspectRatio = canvas.width / canvas.height;

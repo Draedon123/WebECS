@@ -2,10 +2,18 @@ import { Vector2, Vector3 } from "src/core/maths";
 import { VertexArray, type Vertex } from "../VertexArray";
 import { IndexArray } from "../IndexArray";
 import type { MeshEntry } from "src/core/ResourceManager";
+import { Texture } from "src/core/rendering";
 
-async function loadObj(filePath: string): Promise<MeshEntry> {
+type Material = {
+  name: string;
+  texture: Texture;
+};
+
+async function loadObj(
+  filePath: string
+): Promise<{ mesh: MeshEntry; materials: Record<string, Material> }> {
   const fileContents = await (await fetch(filePath)).text();
-  const lines = fileContents.split("\n");
+  const lines = fileContents.split(/[\r\n]+/);
 
   const vertices: Vertex[] = [];
   const indices: number[] = [];
@@ -13,6 +21,7 @@ async function loadObj(filePath: string): Promise<MeshEntry> {
   const vertexPositions: Vector3[] = [];
   const textureCoordinates: Vector2[] = [];
   const vertexNormals: Vector3[] = [];
+  const materials: Record<string, Material> = {};
 
   for (const line of lines) {
     if (line[0] === "#") {
@@ -21,6 +30,20 @@ async function loadObj(filePath: string): Promise<MeshEntry> {
 
     const parts = line.split(" ");
     switch (parts[0]) {
+      case "mtllib": {
+        // debugger;
+        // assume mtl file is in the same folder as obj
+        const mtlPath =
+          filePath.split("/").slice(0, -1).join("/") + "/" + parts[1];
+        const loadedMaterials = await loadMtl(mtlPath);
+
+        for (const material of loadedMaterials) {
+          materials[material.name] = material;
+        }
+
+        break;
+      }
+
       case "v": {
         const w = parts[4] ? parseFloat(parts[4]) : 1;
         const x = parseFloat(parts[1]) / w;
@@ -85,9 +108,62 @@ async function loadObj(filePath: string): Promise<MeshEntry> {
   }
 
   return {
-    vertices: new VertexArray(vertices),
-    indices: new IndexArray(indices),
+    mesh: {
+      vertices: new VertexArray(vertices),
+      indices: new IndexArray(indices),
+    },
+    materials,
   };
+}
+
+async function loadMtl(filePath: string): Promise<Material[]> {
+  const fileContents = await (await fetch(filePath)).text();
+  const rawMaterialsData = fileContents.split(/(newmtl)/);
+  const materials: Material[] = [];
+
+  for (let i = 0; i < rawMaterialsData.length; i++) {
+    if (!rawMaterialsData[i - 1]?.startsWith("newmtl")) {
+      continue;
+    }
+
+    const contents = "newmtl" + rawMaterialsData[i];
+    const lines = contents.split(/[\r\n]+/);
+    // @ts-expect-error will be populated
+    const material: Material = {};
+
+    for (const line of lines) {
+      const parts = line.split(" ");
+
+      switch (parts[0]) {
+        case "newmtl": {
+          material.name = parts[1];
+          break;
+        }
+
+        case "Kd": {
+          const r = parseFloat(parts[1]) * 255;
+          const g = parseFloat(parts[2]) * 255;
+          const b = parseFloat(parts[3]) * 255;
+
+          material.texture = Texture.colour(r, g, b);
+          break;
+        }
+
+        case "map_Kd": {
+          // assume texture is in same directory as mtl file
+          const url = parts[1];
+          const texture = await Texture.fetch(url);
+
+          material.texture = texture;
+          break;
+        }
+      }
+    }
+
+    materials.push(material);
+  }
+
+  return materials;
 }
 
 export { loadObj };
