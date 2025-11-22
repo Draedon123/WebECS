@@ -70,25 +70,30 @@ class ResourceManager {
 
     texture.initialise(this.device);
 
-    this.textures[key] = {
-      texture,
-      bindGroup: this.device.createBindGroup({
-        layout: this.renderer.perObjectBindGroupLayout,
-        entries: [
-          {
-            binding: 0,
-            resource: {
-              buffer: this.transformsBuffer,
-              size: this.transformByteLength + this.transformsPadding,
+    if (texture.texture.depthOrArrayLayers === 1) {
+      this.textures[key] = {
+        texture,
+        bindGroup: this.device.createBindGroup({
+          layout: this.renderer.perObjectBindGroupLayout,
+          entries: [
+            {
+              binding: 0,
+              resource: {
+                buffer: this.transformsBuffer,
+                size: this.transformByteLength + this.transformsPadding,
+              },
             },
-          },
-          {
-            binding: 1,
-            resource: texture.texture.createView(),
-          },
-        ],
-      }),
-    };
+            {
+              binding: 1,
+              resource: texture.texture.createView(),
+            },
+          ],
+        }),
+      };
+    } else {
+      // @ts-expect-error duct-tape fix. will fix later
+      this.textures[key] = { texture };
+    }
   }
 
   public getTexture(key: string): TextureEntry | null {

@@ -31,7 +31,7 @@ class Texture extends Component {
   public initialise(device: GPUDevice): void {
     this.texture = device.createTexture({
       label: this.label,
-      size: [this.width, this.height],
+      size: [this.width, this.height, this.sources.length],
       format: "rgba8unorm",
       usage:
         GPUTextureUsage.RENDER_ATTACHMENT |
@@ -39,7 +39,9 @@ class Texture extends Component {
         GPUTextureUsage.COPY_DST,
     });
 
-    for (const source of this.sources) {
+    for (let i = 0; i < this.sources.length; i++) {
+      const source = this.sources[i];
+
       device.queue.copyExternalImageToTexture(
         {
           source: source,
@@ -47,6 +49,7 @@ class Texture extends Component {
         },
         {
           texture: this.texture,
+          origin: [0, 0, i],
         },
         {
           width: this.width,

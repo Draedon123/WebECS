@@ -6,6 +6,8 @@ import type { Entity } from "src/ecs";
 import { writeAmbientLightToBuffer } from "./scene/writeAmbientLightToBuffer";
 import { PointLight } from "./scene/PointLight";
 import { writeAllPointLightsToBuffer } from "./scene/writeAllPointLightsToBuffer";
+import { SkyboxRenderer } from "./SkyboxRenderer";
+import { getPerspectiveViewMatrixToBuffer } from "../cameras/getPerspectiveViewMatrix";
 
 type RendererSettings = {
   clearColour: GPUColor;
@@ -24,6 +26,7 @@ class Renderer {
   private bindGroup0!: GPUBindGroup;
   private renderPipeline!: GPURenderPipeline;
   private depthTexture!: GPUTexture;
+  private skyboxRenderer!: SkyboxRenderer;
 
   public readonly resourceManager: ResourceManager;
   public readonly perObjectBindGroupLayout: GPUBindGroupLayout;
@@ -229,6 +232,11 @@ class Renderer {
         depthWriteEnabled: true,
       },
     });
+
+    this.skyboxRenderer = await SkyboxRenderer.create(
+      this.device,
+      this.canvasFormat
+    );
   }
 
   public render(scene: Entity, camera: Entity): void {
@@ -258,6 +266,11 @@ class Renderer {
 
     writeAmbientLightToBuffer(scene, this.ambientLightBuffer, this.device);
     writeAllPointLightsToBuffer(this.pointLightsBuffer, this.device);
+    this.skyboxRenderer.render(
+      this.resourceManager,
+      renderPass,
+      getPerspectiveViewMatrixToBuffer(camera)
+    );
 
     renderPass.setPipeline(this.renderPipeline);
     renderPass.setBindGroup(0, this.bindGroup0);
