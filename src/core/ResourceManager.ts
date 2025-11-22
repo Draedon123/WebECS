@@ -1,5 +1,5 @@
 import { EntityManager, type Entity } from "src/ecs";
-import { MeshReference, type IndexArray, type VertexArray } from "./meshes";
+import { IndexArray, MeshReference, VertexArray, type Vertex } from "./meshes";
 import { Texture, TextureReference, type Renderer } from "./rendering";
 import { Children } from "src/ecs/Children";
 import { Parent } from "src/ecs/Parent";
@@ -95,11 +95,25 @@ class ResourceManager {
     return this.textures[key] ?? null;
   }
 
-  public addMesh(key: string, mesh: MeshEntry): void {
+  public addMesh(key: string, mesh: MeshEntry): void;
+  public addMesh(key: string, vertices: Vertex[], indices?: number[]): void;
+  public addMesh(
+    key: string,
+    verticesOrMesh: Vertex[] | MeshEntry,
+    indices?: number[]
+  ): void {
     if (key in this.meshes) {
       this.meshes[key].vertices.vertexBuffer?.destroy();
       this.meshes[key]?.indices?.indexBuffer?.destroy();
     }
+
+    const mesh: MeshEntry =
+      verticesOrMesh instanceof Array
+        ? {
+            vertices: new VertexArray(verticesOrMesh),
+            indices: indices ? new IndexArray(indices) : undefined,
+          }
+        : verticesOrMesh;
 
     mesh.vertices.initialise(this.device);
     mesh.indices?.initialise(this.device);

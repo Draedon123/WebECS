@@ -16,8 +16,8 @@ function render(
 ): void {
   const entityManager = EntityManager.getInstance();
   const renderables = entityManager.querySingular({
-    type: "singleMatch",
-    component: Parent,
+    type: "union",
+    components: [Parent, MeshReference],
   });
 
   for (let i = 0; i < renderables.length; i++) {

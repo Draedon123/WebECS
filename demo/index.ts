@@ -1,7 +1,9 @@
 import {
+  createCubeMesh,
   EntityManager,
   Light,
   lookAt,
+  MeshReference,
   PerspectiveCamera,
   PointLight,
   Position,
@@ -35,20 +37,28 @@ async function main(): Promise<void> {
   const plane = renderer.resourceManager.spawnModel("Plane");
 
   entityManager.addComponent(plane, new Position(0, 0, 0));
-  entityManager.addComponent(plane, new Scale(2));
+  entityManager.addComponent(plane, new Scale(0.5));
   entityManager.addComponent(plane, new Rotation(0, 180, 0));
 
   entityManager.createEntity(
-    new Light(new Vector3(255, 255, 255), 10),
-    new PointLight(10, 1.5),
+    new Light(new Vector3(255, 255, 255), 5),
+    new PointLight(10, 1),
     new Position(-5, -0.5, 0)
   );
 
   entityManager.createEntity(
     new Light(new Vector3(255, 255, 255), 5),
-    new PointLight(10, 2.5),
+    new PointLight(10, 2),
     new Position(1, 6, 2)
   );
+
+  renderer.resourceManager.addMesh("Cube", createCubeMesh());
+  entityManager.createEntity(
+    new MeshReference("Cube"),
+    new Position(0, -5, 0),
+    new Scale(100, 0.1, 100)
+  );
+
   const scene = entityManager.createEntity();
 
   const start = Date.now();
