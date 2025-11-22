@@ -1,1 +1,1 @@
-export * from "./AmbientLight";
+export * from "./Light";
