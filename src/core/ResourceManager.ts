@@ -99,3 +99,4 @@ class ResourceManager {
 }
 
 export { ResourceManager };
+export type { TextureEntry, MeshEntry };
