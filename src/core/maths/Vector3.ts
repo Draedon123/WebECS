@@ -30,6 +30,19 @@ class Vector3 {
     return this;
   }
 
+  public normalise(): this {
+    const magnitude = this.magnitude;
+
+    if (magnitude < 1e-6) {
+      console.warn("Vector magnitude too close to 0 to be normalised");
+      return this;
+    }
+
+    this.scale(1 / magnitude);
+
+    return this;
+  }
+
   public get magnitude(): number {
     return Math.hypot(this.x, this.y, this.z);
   }
