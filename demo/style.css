@@ -3,7 +3,22 @@ body {
   overflow: hidden;
 }
 
-canvas {
+canvas,
+#loading {
   width: 100vw;
   height: 100vh;
+}
+
+#loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 999;
+
+  background-color: #e7dedc;
+  color: #000;
+  font-size: xx-large;
+
+  text-align: center;
+  align-content: center;
 }

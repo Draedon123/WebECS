@@ -145,6 +145,9 @@ async function main(): Promise<void> {
     renderer.render(camera);
   });
 
+  const loadingElement = document.getElementById("loading");
+  loadingElement?.remove();
+
   loop.start();
 }
 
