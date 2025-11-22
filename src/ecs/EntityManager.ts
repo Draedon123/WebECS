@@ -86,11 +86,15 @@ class EntityManager {
     }
   }
 
-  public createEntity(): Entity {
+  public createEntity(...components: Component[]): Entity {
     const entity =
       this.freeIds.length > 0 ? (this.freeIds.pop() as Entity) : this.nextId++;
 
     this.entityComponentMap.set(entity, []);
+
+    for (const component of components) {
+      this.addComponent(entity, component);
+    }
 
     return entity;
   }
