@@ -22,8 +22,8 @@ class Rotation extends Component {
     const cosZ = Math.cos(z / 2);
 
     this.quaternion = new Quaternion(
-      sinX * cosY * cosZ - cosX * sinY * sinZ,
-      cosX * sinY * cosZ + sinX * cosY * sinZ,
+      sinX * cosY * cosZ + cosX * sinY * sinZ,
+      cosX * sinY * cosZ - sinX * cosY * sinZ,
       cosX * cosY * sinZ - sinX * sinY * cosZ,
       cosX * cosY * cosZ + sinX * sinY * sinZ
     );
@@ -51,7 +51,7 @@ class Rotation extends Component {
 
   /** degrees */
   public setEulerAngles(x: number, y: number, z: number): this {
-    this.quaternion.copyFrom(new Rotation(x, y, z).quaternion);
+    this.quaternion = new Rotation(x, y, z).quaternion;
 
     return this;
   }
@@ -73,23 +73,17 @@ class Rotation extends Component {
 
   public set eulerX(degrees: number) {
     const euler = this.getEulerAngles();
-    this.quaternion.copyFrom(
-      new Rotation(degrees, euler[1], euler[2]).quaternion
-    );
+    this.quaternion = new Rotation(degrees, euler[1], euler[2]).quaternion;
   }
 
   public set eulerY(degrees: number) {
     const euler = this.getEulerAngles();
-    this.quaternion.copyFrom(
-      new Rotation(euler[0], degrees, euler[2]).quaternion
-    );
+    this.quaternion = new Rotation(euler[0], degrees, euler[2]).quaternion;
   }
 
   public set eulerZ(degrees: number) {
     const euler = this.getEulerAngles();
-    this.quaternion.copyFrom(
-      new Rotation(euler[0], euler[1], degrees).quaternion
-    );
+    this.quaternion = new Rotation(euler[0], euler[1], degrees).quaternion;
   }
 
   public rotateX(degrees: number) {

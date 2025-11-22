@@ -1,10 +1,12 @@
 import {
   EntityManager,
+  lookAt,
   PerspectiveCamera,
   Position,
   Renderer,
   Rotation,
   Scale,
+  Vector3,
 } from "webecs";
 
 async function main(): Promise<void> {
@@ -16,10 +18,11 @@ async function main(): Promise<void> {
   renderer.settings.clearColour = [0.1, 0.1, 0.1, 1];
 
   const cameraComponent = new PerspectiveCamera({});
+  const cameraPosition = new Position(0, 10, 0);
   const camera = entityManager.createEntity(
     cameraComponent,
-    new Position(0, 10, 10),
-    new Rotation(-45, 0, 0)
+    cameraPosition,
+    new Rotation(0, 0, 0)
   );
 
   await renderer.resourceManager.loadModel(
@@ -33,8 +36,14 @@ async function main(): Promise<void> {
   entityManager.addComponent(plane, new Scale(2));
   entityManager.addComponent(plane, new Rotation(0, 180, 0));
 
+  const start = Date.now();
   function render() {
     cameraComponent.aspectRatio = canvas.width / canvas.height;
+
+    cameraPosition.x = 10 * Math.sin((Date.now() - start) * 3e-4);
+    cameraPosition.z = 10 * Math.cos((Date.now() - start) * 3e-4);
+
+    lookAt(camera, new Vector3(0, 0, 0));
 
     renderer.render(camera);
     requestAnimationFrame(render);

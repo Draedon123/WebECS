@@ -29,8 +29,9 @@ function lookAt(fromEntity: Entity, to: Vector3): void {
 
   rotation.setEulerAngles(
     toDegrees(Math.asin(toPoint.y)),
-    toDegrees(Math.atan2(toPoint.z, toPoint.x)),
-    rotation.eulerZ
+    // i couldn't tell you why there's a +180 here; trial and error led me here
+    180 + toDegrees(Math.atan2(toPoint.x, toPoint.z)),
+    0
   );
 }
 

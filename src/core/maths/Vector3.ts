@@ -14,6 +14,17 @@ class Vector3 {
     yield this.components[2];
   }
 
+  public static cross(a: Vector3, b: Vector3): Vector3 {
+    const ax = a.components[0];
+    const ay = a.components[1];
+    const az = a.components[2];
+    const bx = b.components[0];
+    const by = b.components[1];
+    const bz = b.components[2];
+
+    return new Vector3(ay * bz - az * by, az * bx - ax * bz, ax * by - ay * bx);
+  }
+
   public static add(a: Vector3, b: Vector3): Vector3 {
     return new Vector3(
       a.components[0] + b.components[0],
@@ -35,6 +46,14 @@ class Vector3 {
       a.components[0] - b.components[0],
       a.components[1] - b.components[1],
       a.components[2] - b.components[2]
+    );
+  }
+
+  public clone(): Vector3 {
+    return new Vector3(
+      this.components[0],
+      this.components[1],
+      this.components[2]
     );
   }
 
