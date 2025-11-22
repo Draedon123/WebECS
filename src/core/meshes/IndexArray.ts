@@ -1,4 +1,5 @@
 import { Component } from "src/ecs";
+import { roundUp } from "../maths";
 
 class IndexArray extends Component {
   public static readonly tag: string = "IndexArray";
@@ -25,11 +26,19 @@ class IndexArray extends Component {
 
     const IndexBufferArray =
       this.indexFormat === "uint32" ? Uint32Array : Uint16Array;
-    const indices = new IndexBufferArray(this.rawIndices);
+    const indices = new IndexBufferArray(
+      // data written to buffer must be a multiple of 4 bytes
+      // that means if the index format is uint16 and there are an odd number
+      // of indices, it won't be a multiple of 4
+      this.indexFormat === "uint16"
+        ? roundUp(this.rawIndices.length, 2)
+        : this.rawIndices.length
+    );
+    indices.set(this.rawIndices);
 
     this.indexBuffer = device.createBuffer({
       label: `${this.label} Index Buffer`,
-      size: indices.byteLength,
+      size: roundUp(indices.byteLength, 4),
       usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
     });
 
@@ -37,7 +46,7 @@ class IndexArray extends Component {
   }
 
   public get indexFormat(): GPUIndexFormat {
-    return this.rawIndices.length > 0xffff ? "uint32" : "uint16";
+    return Math.max(...this.rawIndices) > 0xffff ? "uint32" : "uint16";
   }
 
   public get indexCount(): number {

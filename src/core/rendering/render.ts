@@ -10,6 +10,8 @@ import { BufferWriter } from "../gpu";
 import { ResourceManager } from "../ResourceManager";
 import { MeshReference } from "../meshes/MeshReference";
 import { TextureReference } from "./TextureReference";
+import { Parent } from "src/ecs/Parent";
+import { Matrix4 } from "../maths";
 
 function render(
   resourceManager: ResourceManager,
@@ -21,12 +23,8 @@ function render(
     type: "intersection",
     queries: [
       {
-        type: "intersection",
-        components: [MeshReference],
-      },
-      {
-        type: "union",
-        components: [Position, Rotation, Scale],
+        type: "singleMatch",
+        component: Parent,
       },
     ],
   });
@@ -43,7 +41,7 @@ function render(
 
     if (mesh === null) {
       console.error(`No mesh found with key ${meshReference.meshKey}`);
-      return;
+      continue;
     }
 
     const textureReference = entityManager.getComponent<TextureReference>(
@@ -57,8 +55,11 @@ function render(
 
     if (texture === null) {
       console.error(`No texture found with key ${textureKey}`);
-      return;
+      continue;
     }
+
+    const parent =
+      entityManager.getComponent<Parent>(entity, "Parent")?.parent ?? null;
 
     const position =
       entityManager.getComponent<Position>(entity, "Position") ?? undefined;
@@ -72,8 +73,25 @@ function render(
       undefined,
       0
     );
+
     const modelMatrix = calculateModelMatrix({ position, rotation, scale });
-    const normalMatrix = calculateNormalMatrix({ position, rotation, scale });
+
+    if (parent !== null) {
+      const position =
+        entityManager.getComponent<Position>(parent, "Position") ?? undefined;
+      const rotation =
+        entityManager.getComponent<Rotation>(parent, "Rotation") ?? undefined;
+      const scale =
+        entityManager.getComponent<Scale>(parent, "Scale") ?? undefined;
+
+      Matrix4.multiplyMatrices(
+        modelMatrix,
+        calculateModelMatrix({ position, rotation, scale }),
+        modelMatrix
+      );
+    }
+
+    const normalMatrix = calculateNormalMatrix(modelMatrix);
 
     bufferWriter.writeMat4x4f(modelMatrix);
     bufferWriter.writeMat3x3f(normalMatrix);

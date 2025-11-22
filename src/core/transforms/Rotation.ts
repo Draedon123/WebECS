@@ -49,6 +49,13 @@ class Rotation extends Component {
     return [toDegrees(x), toDegrees(y), toDegrees(z)];
   }
 
+  /** degrees */
+  public setEulerAngles(x: number, y: number, z: number): this {
+    this.quaternion.copyFrom(new Rotation(x, y, z).quaternion);
+
+    return this;
+  }
+
   /** pitch, degrees. for incrementing angle instead of setting, use `rotateX` instead to avoid gimbal lock */
   public get eulerX(): number {
     return this.getEulerAngles()[0];

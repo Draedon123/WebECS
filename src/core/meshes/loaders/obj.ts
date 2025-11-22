@@ -9,9 +9,15 @@ type Material = {
   texture: Texture;
 };
 
-async function loadObj(
-  filePath: string
-): Promise<{ mesh: MeshEntry; materials: Record<string, Material> }> {
+type Mesh = MeshEntry & {
+  name: string;
+  materialName: string;
+};
+
+async function loadObj(filePath: string): Promise<{
+  meshes: Mesh[];
+  materials: Record<string, Material>;
+}> {
   const fileContents = await (await fetch(filePath)).text();
   const lines = fileContents.split(/[\r\n]+/);
 
@@ -22,6 +28,8 @@ async function loadObj(
   const textureCoordinates: Vector2[] = [];
   const vertexNormals: Vector3[] = [];
   const materials: Record<string, Material> = {};
+
+  const meshes: Mesh[] = [];
 
   for (const line of lines) {
     if (line[0] === "#") {
@@ -34,13 +42,50 @@ async function loadObj(
         // debugger;
         // assume mtl file is in the same folder as obj
         const mtlPath =
-          filePath.split("/").slice(0, -1).join("/") + "/" + parts[1];
+          filePath.split("/").slice(0, -1).join("/") +
+          "/" +
+          parts.slice(1).join(" ");
         const loadedMaterials = await loadMtl(mtlPath);
 
         for (const material of loadedMaterials) {
           materials[material.name] = material;
         }
 
+        break;
+      }
+
+      case "usemtl": {
+        if (meshes[meshes.length - 1].materialName === "") {
+          meshes[meshes.length - 1].materialName = parts[1];
+        } else {
+          meshes[meshes.length - 1].indices = new IndexArray(
+            indices.splice(0, indices.length)
+          );
+
+          meshes.push({
+            name: "_" + meshes[meshes.length - 1].name,
+            materialName: parts[1],
+            vertices: new VertexArray(vertices),
+          });
+        }
+
+        break;
+      }
+
+      case "o": {
+        const meshName = parts[1];
+
+        if (meshes.length > 0) {
+          meshes[meshes.length - 1].indices = new IndexArray(
+            indices.splice(0, indices.length)
+          );
+        }
+
+        meshes.push({
+          name: meshName,
+          materialName: "",
+          vertices: new VertexArray(vertices),
+        });
         break;
       }
 
@@ -81,7 +126,6 @@ async function loadObj(
           // will be NaN if nonexistent
           const textureCoordinateIndex = parseInt(vertexParts[1]) - 1;
           const normalsIndex = parseInt(vertexParts[2]) - 1;
-
           const position = vertexPositions.at(positionIndex) as Vector3;
           const uv =
             textureCoordinates.at(textureCoordinateIndex) ?? new Vector2(0, 0);
@@ -94,11 +138,10 @@ async function loadObj(
           });
         }
 
-        // triangulation algorithm assuming faces are wound anticlockwise
+        // triangulation algorithm assumes faces are wound anticlockwise
         const vertexCount = parts.length - 1;
+        const firstVertex = vertices.length - vertexCount;
         for (let i = 1; i < vertexCount - 1; i++) {
-          const firstVertex = vertices.length - vertexCount;
-
           indices.push(firstVertex, firstVertex + i, firstVertex + i + 1);
         }
 
@@ -107,11 +150,10 @@ async function loadObj(
     }
   }
 
+  meshes[meshes.length - 1].indices = new IndexArray(indices);
+
   return {
-    mesh: {
-      vertices: new VertexArray(vertices),
-      indices: new IndexArray(indices),
-    },
+    meshes,
     materials,
   };
 }
@@ -151,13 +193,20 @@ async function loadMtl(filePath: string): Promise<Material[]> {
 
         case "map_Kd": {
           // assume texture is in same directory as mtl file
-          const url = parts[1];
+          const url =
+            filePath.split("/").slice(0, -1).join("/") +
+            "/" +
+            parts.slice(1).join(" ");
           const texture = await Texture.fetch(url);
 
           material.texture = texture;
           break;
         }
       }
+    }
+
+    if (!material.texture) {
+      material.texture = Texture.colour(255, 255, 255);
     }
 
     materials.push(material);

@@ -1,13 +1,10 @@
 import {
   EntityManager,
-  loadObj,
-  MeshReference,
   PerspectiveCamera,
   Position,
   Renderer,
   Rotation,
-  TextureReference,
-  // Texture
+  Scale,
 } from "webecs";
 
 async function main(): Promise<void> {
@@ -21,35 +18,25 @@ async function main(): Promise<void> {
   const cameraComponent = new PerspectiveCamera({});
   const camera = entityManager.createEntity(
     cameraComponent,
-    new Position(0, 2, 10),
-    new Rotation(0, 0, 0)
+    new Position(0, 10, 10),
+    new Rotation(-45, 0, 0)
   );
 
-  // const diamondOreTexture = await Texture.fetch(
-  //   import.meta.env.BASE_URL + "/web-assets/diamond_ore.png"
-  // );
-
-  const teapot = await loadObj(
-    import.meta.env.BASE_URL + "/web-assets/teapot.obj"
+  await renderer.resourceManager.loadModel(
+    import.meta.env.BASE_URL + "/web-assets/plane/plane.obj",
+    "Plane",
+    "obj"
   );
+  const plane = renderer.resourceManager.spawnModel("Plane");
 
-  // renderer.resourceManager.addTexture("diamond_ore", diamondOreTexture);
-  renderer.resourceManager.addMesh("Teapot", teapot.mesh);
-  for (const material of Object.values(teapot.materials)) {
-    renderer.resourceManager.addTexture(material.name, material.texture);
-  }
+  console.log(renderer.resourceManager);
 
-  const teapotRotation = new Rotation(0, 0, 0);
-  entityManager.createEntity(
-    new MeshReference("Teapot"),
-    new TextureReference("FrontColor"),
-    teapotRotation
-  );
+  entityManager.addComponent(plane, new Position(0, 0, 0));
+  entityManager.addComponent(plane, new Scale(2));
+  entityManager.addComponent(plane, new Rotation(0, 180, 0));
 
   function render() {
     cameraComponent.aspectRatio = canvas.width / canvas.height;
-
-    teapotRotation.rotateY(0.3);
 
     renderer.render(camera);
     requestAnimationFrame(render);

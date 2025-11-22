@@ -1,5 +1,14 @@
-import type { IndexArray, VertexArray } from "./meshes";
-import { Texture, type Renderer } from "./rendering";
+import { EntityManager, type Entity } from "src/ecs";
+import {
+  loadObj,
+  MeshReference,
+  type IndexArray,
+  type VertexArray,
+} from "./meshes";
+import { Texture, TextureReference, type Renderer } from "./rendering";
+import { Children } from "src/ecs/Children";
+import { Parent } from "src/ecs/Parent";
+import { roundUp } from "./maths";
 
 type TextureEntry = {
   texture: Texture;
@@ -11,11 +20,19 @@ type MeshEntry = {
   indices?: IndexArray;
 };
 
+type ModelEntry = {
+  meshReference: string;
+  textureReference: string;
+}[];
+
+type ModelType = "obj";
+
 class ResourceManager {
   public static readonly DEFAULT_TEXTURE_KEY: string = "default";
 
   private readonly textures: Record<string, TextureEntry>;
   private readonly meshes: Record<string, MeshEntry>;
+  private readonly models: Record<string, ModelEntry>;
 
   private readonly renderer: Renderer;
   private readonly device: GPUDevice;
@@ -27,16 +44,16 @@ class ResourceManager {
   constructor(renderer: Renderer, device: GPUDevice, maxObjects: number) {
     this.textures = {};
     this.meshes = {};
+    this.models = {};
 
     this.renderer = renderer;
     this.device = device;
 
     this.transformByteLength = (16 + 12) * 4;
-    const actualByteLength =
-      this.transformByteLength +
-      device.limits.minUniformBufferOffsetAlignment -
-      (this.transformByteLength %
-        device.limits.minUniformBufferOffsetAlignment);
+    const actualByteLength = roundUp(
+      this.transformByteLength,
+      device.limits.minUniformBufferOffsetAlignment
+    );
     this.transformsPadding = actualByteLength - this.transformByteLength;
 
     this.transformsBuffer = device.createBuffer({
@@ -95,6 +112,74 @@ class ResourceManager {
 
   public getMesh(key: string): MeshEntry | null {
     return this.meshes[key] ?? null;
+  }
+
+  public async loadModel(
+    modelPath: string,
+    modelKey: string,
+    type: ModelType
+  ): Promise<void> {
+    switch (type) {
+      case "obj": {
+        const model = await loadObj(modelPath);
+
+        for (const material of Object.values(model.materials)) {
+          this.addTexture(material.name, material.texture);
+        }
+
+        for (let i = 0; i < model.meshes.length; i++) {
+          const mesh = model.meshes[i];
+          this.addMesh(mesh.name, mesh);
+        }
+
+        this.models[modelKey] = Object.values(model.meshes).map((mesh) => ({
+          meshReference: mesh.name,
+          textureReference: mesh.materialName,
+        }));
+
+        break;
+      }
+
+      default: {
+        console.error(`Unsupported model type ${type}`);
+        break;
+      }
+    }
+  }
+
+  public getModel(modelKey: string): ModelEntry | null {
+    return this.models[modelKey] ?? null;
+  }
+
+  public spawnModel(modelKey: string): Entity {
+    if (!(modelKey in this.models)) {
+      throw new Error(`Model with key ${modelKey} not found`);
+    }
+
+    const entityManager = EntityManager.getInstance();
+    const model = this.models[modelKey];
+    const children = new Children();
+    const modelEntity = entityManager.createEntity(children);
+
+    for (const mesh of model) {
+      // if (!mesh.meshReference.includes("WingLeft")) {
+      //   continue;
+      // }
+
+      const meshReference = new MeshReference(mesh.meshReference);
+      const textureReference = new TextureReference(mesh.textureReference);
+      const parent = new Parent(modelEntity);
+
+      const child = entityManager.createEntity(
+        meshReference,
+        textureReference,
+        parent
+      );
+
+      children.children.push(child);
+    }
+
+    return modelEntity;
   }
 }
 

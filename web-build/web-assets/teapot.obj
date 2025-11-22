@@ -1,6 +1,6 @@
 # Blender 4.2.2 LTS
 # www.blender.org
-mtllib UTAH_BLEND.mtl
+mtllib teapot.mtl
 o teapot
 v -0.000000 2.400000 -1.400000
 v 0.229712 2.400000 -1.381970

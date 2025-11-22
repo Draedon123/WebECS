@@ -42,6 +42,7 @@ class Texture extends Component {
     device.queue.copyExternalImageToTexture(
       {
         source: this.source,
+        flipY: true,
       },
       {
         texture: this.texture,

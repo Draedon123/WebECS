@@ -12,4 +12,8 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(Math.min(value, max), min);
 }
 
-export { toDegrees, toRadians, clamp };
+function roundUp(value: number, toMultipleOf: number): number {
+  return value + toMultipleOf - (value % toMultipleOf);
+}
+
+export { toDegrees, toRadians, clamp, roundUp };

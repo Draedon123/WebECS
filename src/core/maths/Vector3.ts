@@ -22,6 +22,10 @@ class Vector3 {
     return this;
   }
 
+  public static subtract(a: Vector3, b: Vector3): Vector3 {
+    return new Vector3(a.x - b.x, a.y - b.y, a.z - b.z);
+  }
+
   public scale(factor: number): this {
     this.x *= factor;
     this.y *= factor;
