@@ -202,7 +202,7 @@ async function loadMtl(filePath: string): Promise<Material[]> {
             filePath.split("/").slice(0, -1).join("/") +
             "/" +
             parts.slice(1).join(" ");
-          const texture = await Texture.fetch(url);
+          const texture = await Texture.fetch([url]);
 
           material.texture = texture;
           break;
