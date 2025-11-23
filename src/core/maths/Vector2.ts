@@ -1,39 +1,19 @@
 class Vector2 {
-  public readonly components: Float32Array;
+  public x: number;
+  public y: number;
 
   constructor(x: number = 0, y: number = 0) {
-    this.components = new Float32Array(2);
-
-    this.components[0] = x;
-    this.components[1] = y;
-  }
-
-  public static subtract(a: Vector2, b: Vector2): Vector2 {
-    return new Vector2(
-      a.components[0] - b.components[0],
-      a.components[1] - b.components[1]
-    );
+    this.x = x;
+    this.y = y;
   }
 
   *[Symbol.iterator]() {
-    yield this.components[0];
-    yield this.components[1];
+    yield this.x;
+    yield this.y;
   }
 
-  public get x(): number {
-    return this.components[0];
-  }
-
-  public get y(): number {
-    return this.components[1];
-  }
-
-  public set x(x: number) {
-    this.components[0] = x;
-  }
-
-  public set y(y: number) {
-    this.components[1] = y;
+  public static subtract(a: Vector2, b: Vector2): Vector2 {
+    return new Vector2(a.x - b.x, a.y - b.y);
   }
 }
 

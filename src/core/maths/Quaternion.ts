@@ -1,24 +1,26 @@
 class Quaternion {
-  public readonly components: Float32Array;
-  constructor(x: number = 0, y: number = 0, z: number = 0, w: number = 1) {
-    this.components = new Float32Array(4);
+  public x: number;
+  public y: number;
+  public z: number;
+  public w: number;
 
-    this.components[0] = x;
-    this.components[1] = y;
-    this.components[2] = z;
-    this.components[3] = w;
+  constructor(x: number = 0, y: number = 0, z: number = 0, w: number = 1) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.w = w;
   }
 
   public multiply(quaternion: Quaternion): this {
-    const ax = this.components[0];
-    const ay = this.components[1];
-    const az = this.components[2];
-    const aw = this.components[3];
+    const ax = this.x;
+    const ay = this.y;
+    const az = this.z;
+    const aw = this.w;
 
-    const bx = quaternion.components[0];
-    const by = quaternion.components[1];
-    const bz = quaternion.components[2];
-    const bw = quaternion.components[3];
+    const bx = quaternion.x;
+    const by = quaternion.y;
+    const bz = quaternion.z;
+    const bw = quaternion.w;
 
     this.x = aw * bx + ax * bw + ay * bz - az * by;
     this.y = aw * by - ax * bz + ay * bw + az * bx;
@@ -30,15 +32,18 @@ class Quaternion {
 
   public static clone(quaternion: Quaternion): Quaternion {
     return new Quaternion(
-      quaternion.components[0],
-      quaternion.components[1],
-      quaternion.components[2],
-      quaternion.components[3]
+      quaternion.x,
+      quaternion.y,
+      quaternion.z,
+      quaternion.w
     );
   }
 
   public copyFrom(quaternion: Quaternion): this {
-    this.components.set(quaternion.components);
+    this.x = quaternion.x;
+    this.y = quaternion.y;
+    this.z = quaternion.z;
+    this.w = quaternion.w;
 
     return this;
   }
@@ -57,10 +62,10 @@ class Quaternion {
 
     const scale = 1 / (magnitude * magnitude);
 
-    this.components[0] *= -scale;
-    this.components[1] *= -scale;
-    this.components[2] *= -scale;
-    this.components[3] *= scale;
+    this.x *= -scale;
+    this.y *= -scale;
+    this.z *= -scale;
+    this.w *= scale;
 
     return this;
   }
@@ -75,53 +80,16 @@ class Quaternion {
 
     const inverseMagnitude = 1 / magnitude;
 
-    this.components[0] *= inverseMagnitude;
-    this.components[1] *= inverseMagnitude;
-    this.components[2] *= inverseMagnitude;
-    this.components[3] *= inverseMagnitude;
+    this.x *= inverseMagnitude;
+    this.y *= inverseMagnitude;
+    this.z *= inverseMagnitude;
+    this.w *= inverseMagnitude;
 
     return this;
   }
 
   public get magnitude(): number {
-    return Math.hypot(
-      this.components[0],
-      this.components[1],
-      this.components[2],
-      this.components[3]
-    );
-  }
-
-  public get x(): number {
-    return this.components[0];
-  }
-
-  public get y(): number {
-    return this.components[1];
-  }
-
-  public get z(): number {
-    return this.components[2];
-  }
-
-  public get w(): number {
-    return this.components[3];
-  }
-
-  public set x(value: number) {
-    this.components[0] = value;
-  }
-
-  public set y(value: number) {
-    this.components[1] = value;
-  }
-
-  public set z(value: number) {
-    this.components[2] = value;
-  }
-
-  public set w(value: number) {
-    this.components[3] = value;
+    return Math.hypot(this.x, this.y, this.z, this.w);
   }
 }
 

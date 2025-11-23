@@ -1,90 +1,74 @@
 class Vector3 {
-  private readonly components: Float32Array;
+  public x: number;
+  public y: number;
+  public z: number;
   constructor(x: number = 0, y: number = 0, z: number = 0) {
-    this.components = new Float32Array(3);
-
-    this.components[0] = x;
-    this.components[1] = y;
-    this.components[2] = z;
+    this.x = x;
+    this.y = y;
+    this.z = z;
   }
 
   *[Symbol.iterator]() {
-    yield this.components[0];
-    yield this.components[1];
-    yield this.components[2];
+    yield this.x;
+    yield this.y;
+    yield this.z;
   }
 
   public static cross(a: Vector3, b: Vector3): Vector3 {
-    const ax = a.components[0];
-    const ay = a.components[1];
-    const az = a.components[2];
-    const bx = b.components[0];
-    const by = b.components[1];
-    const bz = b.components[2];
+    const ax = a.x;
+    const ay = a.y;
+    const az = a.z;
+    const bx = b.x;
+    const by = b.y;
+    const bz = b.z;
 
     return new Vector3(ay * bz - az * by, az * bx - ax * bz, ax * by - ay * bx);
   }
 
   public static dot(a: Vector3, b: Vector3): number {
-    return (
-      a.components[0] * b.components[0] +
-      a.components[1] * b.components[1] +
-      a.components[2] * b.components[2]
-    );
+    return a.x * b.x + a.y * b.y + a.z * b.z;
   }
 
   public static add(a: Vector3, b: Vector3): Vector3 {
-    return new Vector3(
-      a.components[0] + b.components[0],
-      a.components[1] + b.components[1],
-      a.components[2] + b.components[2]
-    );
+    return new Vector3(a.x + b.x, a.y + b.y, a.z + b.z);
   }
 
   public add(vector3: Vector3): this {
-    this.components[0] += vector3.components[0];
-    this.components[1] += vector3.components[1];
-    this.components[2] += vector3.components[2];
+    this.x += vector3.x;
+    this.y += vector3.y;
+    this.z += vector3.z;
 
     return this;
   }
 
   public static subtract(a: Vector3, b: Vector3): Vector3 {
-    return new Vector3(
-      a.components[0] - b.components[0],
-      a.components[1] - b.components[1],
-      a.components[2] - b.components[2]
-    );
+    return new Vector3(a.x - b.x, a.y - b.y, a.z - b.z);
   }
 
   public subtract(vector3: Vector3): this {
-    this.components[0] -= vector3.components[0];
-    this.components[1] -= vector3.components[1];
-    this.components[2] -= vector3.components[2];
+    this.x -= vector3.x;
+    this.y -= vector3.y;
+    this.z -= vector3.z;
 
     return this;
   }
 
   public clone(): Vector3 {
-    return new Vector3(
-      this.components[0],
-      this.components[1],
-      this.components[2]
-    );
+    return new Vector3(this.x, this.y, this.z);
   }
 
   public static scale(vector3: Vector3, factor: number): Vector3 {
     return new Vector3(
-      vector3.components[0] * factor,
-      vector3.components[1] * factor,
-      vector3.components[2] * factor
+      vector3.x * factor,
+      vector3.y * factor,
+      vector3.z * factor
     );
   }
 
   public scale(factor: number): this {
-    this.components[0] *= factor;
-    this.components[1] *= factor;
-    this.components[2] *= factor;
+    this.x *= factor;
+    this.y *= factor;
+    this.z *= factor;
 
     return this;
   }
@@ -103,43 +87,15 @@ class Vector3 {
 
     const scale = 1 / magnitude;
 
-    this.components[0] *= scale;
-    this.components[1] *= scale;
-    this.components[2] *= scale;
+    this.x *= scale;
+    this.y *= scale;
+    this.z *= scale;
 
     return this;
   }
 
   public get magnitude(): number {
-    return Math.hypot(
-      this.components[0],
-      this.components[1],
-      this.components[2]
-    );
-  }
-
-  public get x(): number {
-    return this.components[0];
-  }
-
-  public get y(): number {
-    return this.components[1];
-  }
-
-  public get z(): number {
-    return this.components[2];
-  }
-
-  public set x(x: number) {
-    this.components[0] = x;
-  }
-
-  public set y(y: number) {
-    this.components[1] = y;
-  }
-
-  public set z(z: number) {
-    this.components[2] = z;
+    return Math.hypot(this.x, this.y, this.z);
   }
 }
 
