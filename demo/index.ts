@@ -170,6 +170,6 @@ if (import.meta.env.DEV) {
     errorMessageElement.textContent = errorMessage;
 
     const iframe = document.querySelector("iframe") as HTMLIFrameElement;
-    iframe.src = "https://www.youtube.com/embed/6vH1kX_Rii4";
+    iframe.src = "https://www.youtube.com/embed/ydYztEmlkmk";
   });
 }
