@@ -67,9 +67,10 @@ function renderObject(
     "NormalMapReference"
   );
 
-  const normalMapKey =
-    normalMapReference?.textureKey ?? ResourceManager.DEFAULT_TEXTURE_KEY;
-  const normalMap = resourceManager.getTexture(normalMapKey);
+  const normalMapKey = normalMapReference?.textureKey;
+  const normalMap = resourceManager.getTexture(
+    normalMapKey ?? ResourceManager.DEFAULT_TEXTURE_KEY
+  );
 
   const parent =
     entityManager.getComponent<Parent>(entity, "Parent")?.parent ?? null;
@@ -103,7 +104,9 @@ function renderObject(
   bufferWriter.writeMat4x4f(modelMatrix);
   bufferWriter.writeMat3x3f(normalMatrix);
   bufferWriter.pad(4);
-  bufferWriter.writeUint32(normalMap !== null ? 1 : 0);
+  bufferWriter.writeUint32(
+    normalMapKey !== undefined && normalMap !== null ? 1 : 0
+  );
 
   const bufferOffset =
     objectIndex *

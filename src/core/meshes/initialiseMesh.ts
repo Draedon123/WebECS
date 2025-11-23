@@ -44,7 +44,7 @@ function initialiseMesh(
 
   if (!vertexArray.initialised) {
     const vertices = new Float32Array(
-      vertexArray.rawVertices.length * (3 + 2 + 3 + 3)
+      vertexArray.rawVertices.length * (3 + 2 + 3 + 4)
     );
 
     for (
@@ -52,8 +52,9 @@ function initialiseMesh(
       i < vertexCount;
       i++
     ) {
-      const offset = i * (3 + 2 + 3 + 3);
+      const offset = i * (3 + 2 + 3 + 4);
       const vertex = vertexArray.rawVertices[i];
+      const tangent = tangents[i];
 
       vertices[offset + 0] = vertex.position.x;
       vertices[offset + 1] = vertex.position.y;
@@ -63,9 +64,10 @@ function initialiseMesh(
       vertices[offset + 5] = vertex.normal.x;
       vertices[offset + 6] = vertex.normal.y;
       vertices[offset + 7] = vertex.normal.z;
-      vertices[offset + 8] = tangents[i].x;
-      vertices[offset + 9] = tangents[i].y;
-      vertices[offset + 10] = tangents[i].z;
+      vertices[offset + 8] = tangent.x;
+      vertices[offset + 9] = tangent.y;
+      vertices[offset + 10] = tangent.z;
+      vertices[offset + 11] = tangent.w;
     }
 
     vertexArray.vertexBuffer = device.createBuffer({

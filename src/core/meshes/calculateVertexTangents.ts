@@ -1,13 +1,15 @@
-import { Vector2, Vector3 } from "../maths";
+import { Quaternion, Vector2, Vector3 } from "../maths";
 import type { Vertex } from "./VertexArray";
 
 function calculateVertexTangents(
   vertices: Vertex[],
   indices?: number[]
-): Vector3[] {
+): Quaternion[] {
   const triangleCount = (indices?.length ?? vertices.length) / 3;
 
-  const tangents: Vector3[] = new Array(vertices.length);
+  const _tangents: Vector3[] = new Array(vertices.length);
+  const bitangents: Vector3[] = new Array(vertices.length);
+  const tangents: Quaternion[] = new Array(vertices.length);
 
   for (let i = 0; i < triangleCount; i++) {
     const index0 = indices ? indices[3 * i + 0] : 3 * i + 0;
@@ -24,30 +26,90 @@ function calculateVertexTangents(
     const deltaUV0 = Vector2.subtract(vertex1.uv, vertex0.uv);
     const deltaUV1 = Vector2.subtract(vertex2.uv, vertex0.uv);
 
-    const inverseDeterminant =
-      1 / (deltaUV0.x * deltaUV1.y - deltaUV1.x * deltaUV0.y);
-    const tangent = edge0
-      .scale(deltaUV1.y)
-      .subtract(edge1.scale(deltaUV0.y))
+    const determinant = deltaUV0.x * deltaUV1.y - deltaUV1.x * deltaUV0.y;
+
+    if (Math.abs(determinant) < 1e-8) {
+      continue;
+    }
+
+    const inverseDeterminant = 1 / determinant;
+    const tangent = Vector3.scale(edge0, deltaUV1.y)
+      .subtract(Vector3.scale(edge1, deltaUV0.y))
       .scale(inverseDeterminant);
 
-    if (tangents[index0] === undefined) {
-      tangents[index0] = tangent;
+    const bitangent = Vector3.scale(edge1, deltaUV0.x)
+      .subtract(Vector3.scale(edge1, deltaUV0.x))
+      .scale(inverseDeterminant);
+
+    if (_tangents[index0] === undefined) {
+      _tangents[index0] = tangent;
     } else {
-      tangents[index0].add(tangent);
+      _tangents[index0].add(tangent);
     }
 
-    if (tangents[index1] === undefined) {
-      tangents[index1] = tangent;
+    if (_tangents[index1] === undefined) {
+      _tangents[index1] = tangent;
     } else {
-      tangents[index1].add(tangent);
+      _tangents[index1].add(tangent);
     }
 
-    if (tangents[index2] === undefined) {
-      tangents[index2] = tangent;
+    if (_tangents[index2] === undefined) {
+      _tangents[index2] = tangent;
     } else {
-      tangents[index2].add(tangent);
+      _tangents[index2].add(tangent);
     }
+
+    if (bitangents[index0] === undefined) {
+      bitangents[index0] = bitangent;
+    } else {
+      bitangents[index0].add(bitangent);
+    }
+
+    if (bitangents[index1] === undefined) {
+      bitangents[index1] = bitangent;
+    } else {
+      bitangents[index1].add(bitangent);
+    }
+
+    if (bitangents[index2] === undefined) {
+      bitangents[index2] = bitangent;
+    } else {
+      bitangents[index2].add(bitangent);
+    }
+  }
+
+  for (let i = 0, vertexCount = vertices.length; i < vertexCount; i++) {
+    const normal = vertices[i].normal;
+    let tangent = _tangents[i];
+    let bitangent = bitangents[i];
+
+    // reconstruct tangent if missing
+    if (tangent === undefined || tangent?.magnitude < 1e-6) {
+      // if the tangent is missing, that meanst the vertex is only part of
+      // degenerate triangles, which won't visibly be rendered
+      // hence, it doesn't really matter what the tangent is
+      tangent = Vector3.cross(
+        normal,
+        Math.abs(normal.x) > 0.5 ? new Vector3(0, 1, 0) : new Vector3(1, 0, 0)
+      ).normalise();
+      bitangent = Vector3.cross(normal, tangent);
+    }
+
+    const orthogonalised = Vector3.subtract(
+      tangent,
+      Vector3.scale(normal, Vector3.dot(normal, tangent))
+    ).normalise();
+    const handedness =
+      Vector3.dot(Vector3.cross(normal, orthogonalised), bitangent) < 0
+        ? -1
+        : 1;
+
+    tangents[i] = new Quaternion(
+      orthogonalised.x,
+      orthogonalised.y,
+      orthogonalised.z,
+      handedness
+    );
   }
 
   return tangents;

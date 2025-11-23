@@ -25,6 +25,14 @@ class Vector3 {
     return new Vector3(ay * bz - az * by, az * bx - ax * bz, ax * by - ay * bx);
   }
 
+  public static dot(a: Vector3, b: Vector3): number {
+    return (
+      a.components[0] * b.components[0] +
+      a.components[1] * b.components[1] +
+      a.components[2] * b.components[2]
+    );
+  }
+
   public static add(a: Vector3, b: Vector3): Vector3 {
     return new Vector3(
       a.components[0] + b.components[0],

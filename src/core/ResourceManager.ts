@@ -1,6 +1,11 @@
 import { EntityManager, type Entity } from "src/ecs";
 import { IndexArray, MeshReference, VertexArray, type Vertex } from "./meshes";
-import { Texture, TextureReference, type Renderer } from "./rendering";
+import {
+  NormalMapReference,
+  Texture,
+  TextureReference,
+  type Renderer,
+} from "./rendering";
 import { Children } from "src/ecs/Children";
 import { Parent } from "src/ecs/Parent";
 import { roundUp } from "./maths";
@@ -21,6 +26,7 @@ type MeshEntry = {
 type ModelEntry = {
   meshReference: string;
   textureReference: string;
+  normalMapReference?: string;
 }[];
 
 type ModelType = "obj";
@@ -155,6 +161,10 @@ class ResourceManager {
 
         for (const material of Object.values(model.materials)) {
           this.addTexture(material.name, material.texture);
+
+          if (material.normalMap) {
+            this.addTexture(material.name + "NormalMap", material.normalMap);
+          }
         }
 
         for (let i = 0; i < model.meshes.length; i++) {
@@ -165,6 +175,9 @@ class ResourceManager {
         this.models[modelKey] = Object.values(model.meshes).map((mesh) => ({
           meshReference: mesh.name,
           textureReference: mesh.materialName,
+          normalMapReference: model.materials[mesh.materialName].normalMap
+            ? mesh.materialName + "NormalMap"
+            : undefined,
         }));
 
         break;
@@ -201,6 +214,13 @@ class ResourceManager {
         textureReference,
         parent
       );
+
+      if (mesh.normalMapReference) {
+        entityManager.addComponent(
+          child,
+          new NormalMapReference(mesh.normalMapReference)
+        );
+      }
 
       children.children.push(child);
     }

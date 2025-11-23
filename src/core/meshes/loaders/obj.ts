@@ -18,7 +18,7 @@ type Mesh = MeshEntry & {
 
 async function loadObj(filePath: string): Promise<{
   meshes: Mesh[];
-  materials: Material[];
+  materials: Record<string, Material>;
 }> {
   let fileContents: string;
   if (filePath.endsWith(".gz")) {
@@ -40,7 +40,7 @@ async function loadObj(filePath: string): Promise<{
   const vertexPositions: Vector3[] = [];
   const textureCoordinates: Vector2[] = [];
   const vertexNormals: Vector3[] = [];
-  const materials: Material[] = [];
+  const materials: Record<string, Material> = {};
 
   const meshes: Mesh[] = [];
 
@@ -61,7 +61,7 @@ async function loadObj(filePath: string): Promise<{
         const loadedMaterials = await loadMtl(mtlPath);
 
         for (const material of loadedMaterials) {
-          materials.push(material);
+          materials[material.name] = material;
         }
 
         break;
@@ -128,9 +128,7 @@ async function loadObj(filePath: string): Promise<{
         const y = parseFloat(parts[2]);
         const z = parseFloat(parts[3]);
 
-        // should probably normalise but normalisation is already done in the
-        // shader anyways
-        vertexNormals.push(new Vector3(x, y, z)); /*.normalise())*/
+        vertexNormals.push(new Vector3(x, y, z).normalise());
         break;
       }
 

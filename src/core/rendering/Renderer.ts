@@ -228,7 +228,7 @@ class Renderer {
         entryPoint: "vertexMain",
         buffers: [
           {
-            arrayStride: (3 + 2 + 3 + 3) * 4,
+            arrayStride: (3 + 2 + 3 + 4) * 4,
             attributes: [
               // position
               {
@@ -251,7 +251,7 @@ class Renderer {
               // tangent
               {
                 shaderLocation: 3,
-                format: "float32x3",
+                format: "float32x4",
                 offset: (3 + 2 + 3) * 4,
               },
             ],
