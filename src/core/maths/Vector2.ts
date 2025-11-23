@@ -8,6 +8,13 @@ class Vector2 {
     this.components[1] = y;
   }
 
+  public static subtract(a: Vector2, b: Vector2): Vector2 {
+    return new Vector2(
+      a.components[0] - b.components[0],
+      a.components[1] - b.components[1]
+    );
+  }
+
   *[Symbol.iterator]() {
     yield this.components[0];
     yield this.components[1];
