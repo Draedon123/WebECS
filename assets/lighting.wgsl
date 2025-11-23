@@ -1,9 +1,12 @@
 fn calculatePointLight(light: ptr<storage, PointLight>, normal: vec3f, fragmentPosition: vec3f, inverseTBN: mat3x3f) -> vec3f {
   let toLight: vec3f = inverseTBN * (light.position - fragmentPosition);
   let lightDirection: vec3f = normalize(toLight);
+  let cameraDirection: vec3f = normalize(inverseTBN * (camera.position - fragmentPosition));
+  let halfway: vec3f = normalize(lightDirection + cameraDirection);
   let distance = length(toLight);
 
   let diffuse: f32 = max(0.0, dot(lightDirection, normal));
+  let specular: f32 = pow(max(dot(normal, halfway), 0.0), 32.0);
   let normalised: f32 = distance / light.maxDistance;
   // https://lisyarus.github.io/blog/posts/point-light-attenuation.html
   let intensity = 
@@ -12,13 +15,17 @@ fn calculatePointLight(light: ptr<storage, PointLight>, normal: vec3f, fragmentP
     (1.0 - normalised * normalised) *
     (1.0 - normalised * normalised) /
     (1.0 + light.decayRate * normalised * normalised);
-  let diffuseLight: vec3f = diffuse * intensity * light.colour;
+  let resultantLight: vec3f = (diffuse + specular) * intensity * light.colour;
 
-  return diffuseLight;
+  return resultantLight;
 }
 
 fn calculateDirectionalLight(normal: vec3f, fragmentPosition: vec3f, inverseTBN: mat3x3f) -> vec3f {
-  let diffuse: f32 = max(0.0, dot(inverseTBN * directionalLight.direction, normal));
+  let direction: vec3f = normalize(inverseTBN * directionalLight.direction);
+  let cameraDirection: vec3f = normalize(inverseTBN * (camera.position - fragmentPosition));
+  let halfway: vec3f = normalize(direction + cameraDirection);
+  let diffuse: f32 = max(0.0, dot(direction, normal));
+  let specular: f32 = pow(max(dot(normal, halfway), 0.0), 32.0);
 
-  return diffuse * directionalLight.intensity * directionalLight.colour;
+  return (diffuse + specular) * directionalLight.intensity * directionalLight.colour;
 }

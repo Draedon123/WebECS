@@ -47,12 +47,12 @@ async function main(): Promise<void> {
   entityManager.addComponent(iss, issRotation);
 
   entityManager.createEntity(
-    new Light(new Vector3(255, 255, 255), 0.15),
+    new Light(new Vector3(255, 255, 255), 0.1),
     new AmbientLight()
   );
   entityManager.createEntity(
-    new Light(new Vector3(255, 255, 255), 0.5),
-    new DirectionalLight(new Vector3(0, 1, 0))
+    new Light(new Vector3(255, 255, 255), 0.7),
+    new DirectionalLight(new Vector3(0, 1, 0.2))
   );
 
   const skyboxTexture = await Texture.createCubemap(

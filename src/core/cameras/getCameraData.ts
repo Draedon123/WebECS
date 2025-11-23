@@ -1,9 +1,14 @@
 import { EntityManager, type Entity } from "src/ecs";
-import { Matrix4 } from "../maths";
+import { Matrix4, Vector3 } from "../maths";
 import type { Position, Rotation } from "../transforms";
 import type { PerspectiveCamera } from "./PerspectiveCamera";
 
-function getPerspectiveViewMatrixToBuffer(camera: Entity): Matrix4 {
+type CameraData = {
+  perspectiveViewMatrix: Matrix4;
+  position: Vector3;
+};
+
+function getCameraData(camera: Entity): CameraData {
   const entityManager = EntityManager.getInstance();
   const cameraPosition = entityManager.getComponent<Position>(
     camera,
@@ -20,17 +25,17 @@ function getPerspectiveViewMatrixToBuffer(camera: Entity): Matrix4 {
 
   if (cameraComponent === null) {
     console.error("No camera found");
-    return new Matrix4();
+    return { perspectiveViewMatrix: new Matrix4(), position: new Vector3() };
   }
 
   if (cameraPosition === null) {
     console.error("Camera does not have position component");
-    return new Matrix4();
+    return { perspectiveViewMatrix: new Matrix4(), position: new Vector3() };
   }
 
   if (cameraRotation === null) {
     console.error("Camera does not have rotation component");
-    return new Matrix4();
+    return { perspectiveViewMatrix: new Matrix4(), position: new Vector3() };
   }
 
   const perspectiveViewMatrix = cameraComponent.calculatePerspectiveViewMatrix(
@@ -38,7 +43,7 @@ function getPerspectiveViewMatrixToBuffer(camera: Entity): Matrix4 {
     cameraRotation
   );
 
-  return perspectiveViewMatrix;
+  return { perspectiveViewMatrix, position: cameraPosition.position };
 }
 
-export { getPerspectiveViewMatrixToBuffer };
+export { getCameraData };

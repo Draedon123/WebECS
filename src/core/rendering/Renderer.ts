@@ -1,17 +1,17 @@
 import { Shader } from "./Shader";
 import { render } from "./render";
 import { ResourceManager } from "../ResourceManager";
-import { writePerspectiveViewMatrixToBuffer } from "../cameras/writePerspectiveViewMatrixToBuffer";
+import { writeCameraDataToBuffer } from "../cameras/writeCameraDataToBuffer";
 import { EntityManager, type Entity } from "src/ecs";
 import { writeAmbientLightToBuffer } from "./scene/writeAmbientLightToBuffer";
 import { PointLight } from "./scene/PointLight";
 import { writeAllPointLightsToBuffer } from "./scene/writeAllPointLightsToBuffer";
 import { SkyboxRenderer } from "./SkyboxRenderer";
-import { getPerspectiveViewMatrixToBuffer } from "../cameras/getPerspectiveViewMatrix";
 import type { PerspectiveCamera } from "../cameras";
 import { writeDirectionalLightToBuffer } from "./scene/writeDirectionalLightToBuffer";
 import { AmbientLight, Light } from "./scene";
 import { DirectionalLight } from "./scene/DirectionalLight";
+import { getCameraData } from "../cameras/getCameraData";
 
 type RendererSettings = {
   clearColour: GPUColor;
@@ -35,7 +35,7 @@ class Renderer {
   public readonly resourceManager: ResourceManager;
   public readonly perObjectBindGroupLayout: GPUBindGroupLayout;
   public readonly normalMapBindGroupLayout: GPUBindGroupLayout;
-  private readonly perspectiveViewMatrixBuffer: GPUBuffer;
+  private readonly cameraBuffer: GPUBuffer;
   private readonly ambientLightBuffer: GPUBuffer;
   private readonly directionalLightBuffer: GPUBuffer;
   private readonly pointLightsBuffer: GPUBuffer;
@@ -61,9 +61,9 @@ class Renderer {
       maxPointLights: settings.maxPointLights ?? 32,
     };
 
-    this.perspectiveViewMatrixBuffer = device.createBuffer({
+    this.cameraBuffer = device.createBuffer({
       label: "Perspective View Matrix Buffer",
-      size: 16 * 4,
+      size: 20 * 4,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
@@ -159,7 +159,7 @@ class Renderer {
         {
           binding: 0,
           buffer: { type: "uniform" },
-          visibility: GPUShaderStage.VERTEX,
+          visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
         },
         {
           binding: 1,
@@ -190,7 +190,7 @@ class Renderer {
       entries: [
         {
           binding: 0,
-          resource: { buffer: this.perspectiveViewMatrixBuffer },
+          resource: { buffer: this.cameraBuffer },
         },
         {
           binding: 1,
@@ -309,11 +309,7 @@ class Renderer {
       ) as PerspectiveCamera
     ).aspectRatio = this.canvas.width / this.canvas.height;
 
-    writePerspectiveViewMatrixToBuffer(
-      camera,
-      this.perspectiveViewMatrixBuffer,
-      this.device
-    );
+    writeCameraDataToBuffer(camera, this.cameraBuffer, this.device);
 
     const entityManager = EntityManager.getInstance();
     const ambientLight = entityManager.querySingular({
@@ -340,7 +336,7 @@ class Renderer {
     this.skyboxRenderer.render(
       this.resourceManager,
       renderPass,
-      getPerspectiveViewMatrixToBuffer(camera)
+      getCameraData(camera).perspectiveViewMatrix
     );
 
     renderPass.setPipeline(this.renderPipeline);

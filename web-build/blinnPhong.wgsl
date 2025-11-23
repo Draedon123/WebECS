@@ -49,7 +49,12 @@ struct PointLight {
   decayRate: f32,
 }
 
-@group(0) @binding(0) var <uniform> perspectiveViewMatrix: mat4x4f; 
+struct Camera {
+  perspectiveViewMatrix: mat4x4f,
+  position: vec3f,
+}
+
+@group(0) @binding(0) var <uniform> camera: Camera; 
 @group(0) @binding(1) var textureSampler: sampler;
 @group(0) @binding(2) var <uniform> ambientLight: AmbientLight;
 @group(0) @binding(3) var <uniform> directionalLight: DirectionalLight;
@@ -71,7 +76,7 @@ fn vertexMain(vertex: Vertex) -> VertexOutput {
   let inverseTBN: mat3x3f = transpose(mat3x3f(tangent, bitangent, normal));
 
   output.worldPosition = objectData.modelMatrix * vec4f(vertex.position, 1.0);
-  output.position = perspectiveViewMatrix * output.worldPosition;
+  output.position = camera.perspectiveViewMatrix * output.worldPosition;
   output.uv = vertex.uv;
   output.normal = normal;
   output._t = inverseTBN[0];
