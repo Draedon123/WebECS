@@ -34,6 +34,7 @@ class Renderer {
 
   public readonly resourceManager: ResourceManager;
   public readonly perObjectBindGroupLayout: GPUBindGroupLayout;
+  public readonly normalMapBindGroupLayout: GPUBindGroupLayout;
   private readonly perspectiveViewMatrixBuffer: GPUBuffer;
   private readonly ambientLightBuffer: GPUBuffer;
   private readonly directionalLightBuffer: GPUBuffer;
@@ -94,6 +95,16 @@ class Renderer {
         },
         {
           binding: 1,
+          texture: {},
+          visibility: GPUShaderStage.FRAGMENT,
+        },
+      ],
+    });
+    this.normalMapBindGroupLayout = this.device.createBindGroupLayout({
+      label: "Renderer Normal Map Bind Group Layout",
+      entries: [
+        {
+          binding: 0,
           texture: {},
           visibility: GPUShaderStage.FRAGMENT,
         },
@@ -202,7 +213,11 @@ class Renderer {
 
     const renderPipelineLayout = this.device.createPipelineLayout({
       label: "Renderer Render Pipeline Layout",
-      bindGroupLayouts: [bindGroup0Layout, this.perObjectBindGroupLayout],
+      bindGroupLayouts: [
+        bindGroup0Layout,
+        this.perObjectBindGroupLayout,
+        this.normalMapBindGroupLayout,
+      ],
     });
 
     this.renderPipeline = this.device.createRenderPipeline({

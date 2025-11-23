@@ -9,7 +9,8 @@ import { initialiseMesh } from "./meshes/initialiseMesh";
 
 type TextureEntry = {
   texture: Texture;
-  bindGroup: GPUBindGroup;
+  textureBindGroup?: GPUBindGroup;
+  normalMapBindGroup?: GPUBindGroup;
 };
 
 type MeshEntry = {
@@ -46,7 +47,7 @@ class ResourceManager {
     this.renderer = renderer;
     this.device = device;
 
-    this.transformByteLength = (16 + 12) * 4;
+    this.transformByteLength = (16 + 12 + 4) * 4;
     const actualByteLength = roundUp(
       this.transformByteLength,
       device.limits.minUniformBufferOffsetAlignment
@@ -71,30 +72,40 @@ class ResourceManager {
 
     texture.initialise(this.device);
 
-    if (texture.texture.depthOrArrayLayers === 1) {
-      this.textures[key] = {
-        texture,
-        bindGroup: this.device.createBindGroup({
-          layout: this.renderer.perObjectBindGroupLayout,
-          entries: [
-            {
-              binding: 0,
-              resource: {
-                buffer: this.transformsBuffer,
-                size: this.transformByteLength + this.transformsPadding,
-              },
-            },
-            {
-              binding: 1,
-              resource: texture.texture.createView(),
-            },
-          ],
-        }),
-      };
-    } else {
-      // @ts-expect-error duct-tape fix. will fix later
-      this.textures[key] = { texture };
-    }
+    this.textures[key] = {
+      texture,
+      textureBindGroup:
+        texture.texture.depthOrArrayLayers === 1
+          ? this.device.createBindGroup({
+              layout: this.renderer.perObjectBindGroupLayout,
+              entries: [
+                {
+                  binding: 0,
+                  resource: {
+                    buffer: this.transformsBuffer,
+                    size: this.transformByteLength + this.transformsPadding,
+                  },
+                },
+                {
+                  binding: 1,
+                  resource: texture.texture.createView(),
+                },
+              ],
+            })
+          : undefined,
+      normalMapBindGroup:
+        texture.texture.depthOrArrayLayers === 1
+          ? this.device.createBindGroup({
+              layout: this.renderer.normalMapBindGroupLayout,
+              entries: [
+                {
+                  binding: 0,
+                  resource: texture.texture.createView(),
+                },
+              ],
+            })
+          : undefined,
+    };
   }
 
   public getTexture(key: string): TextureEntry | null {

@@ -8,6 +8,7 @@ import { gunzipSync, strFromU8 } from "fflate";
 type Material = {
   name: string;
   texture: Texture;
+  normalMap?: Texture;
 };
 
 type Mesh = MeshEntry & {
@@ -222,6 +223,20 @@ async function loadMtl(filePath: string): Promise<Material[]> {
           );
 
           break;
+        }
+
+        case "norm": {
+          // assume texture is in same directory as mtl file
+          const url =
+            filePath.split("/").slice(0, -1).join("/") +
+            "/" +
+            parts.slice(1).join(" ");
+
+          texturePromises.push(
+            Texture.fetch([url]).then((normalMap) => {
+              material.normalMap = normalMap;
+            })
+          );
         }
       }
     }

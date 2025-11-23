@@ -8,6 +8,7 @@ import { Matrix4 } from "../maths";
 import { BufferWriter } from "../gpu/BufferWriter";
 import { calculateModelMatrix } from "../transforms/calculateModelMatrix";
 import { calculateNormalMatrix } from "../transforms/calculateNormalMatrix";
+import { NormalMapReference } from "./NormalMapReference";
 
 function render(
   resourceManager: ResourceManager,
@@ -56,10 +57,19 @@ function renderObject(
     textureReference?.textureKey ?? ResourceManager.DEFAULT_TEXTURE_KEY;
   const texture = resourceManager.getTexture(textureKey);
 
-  if (texture === null) {
-    console.error(`No texture found with key ${textureKey}`);
+  if (texture === null || texture.textureBindGroup === undefined) {
+    console.error(`No valid texture found with key ${textureKey}`);
     return;
   }
+
+  const normalMapReference = entityManager.getComponent<NormalMapReference>(
+    entity,
+    "NormalMapReference"
+  );
+
+  const normalMapKey =
+    normalMapReference?.textureKey ?? ResourceManager.DEFAULT_TEXTURE_KEY;
+  const normalMap = resourceManager.getTexture(normalMapKey);
 
   const parent =
     entityManager.getComponent<Parent>(entity, "Parent")?.parent ?? null;
@@ -92,6 +102,8 @@ function renderObject(
 
   bufferWriter.writeMat4x4f(modelMatrix);
   bufferWriter.writeMat3x3f(normalMatrix);
+  bufferWriter.pad(4);
+  bufferWriter.writeUint32(normalMap !== null ? 1 : 0);
 
   const bufferOffset =
     objectIndex *
@@ -103,16 +115,13 @@ function renderObject(
   );
 
   renderPass.setVertexBuffer(0, mesh.vertices.vertexBuffer);
-  renderPass.setBindGroup(1, texture.bindGroup, [
+  renderPass.setBindGroup(1, texture.textureBindGroup, [
     objectIndex *
       (resourceManager.transformByteLength + resourceManager.transformsPadding),
   ]);
+  renderPass.setBindGroup(2, normalMap?.normalMapBindGroup);
 
   if (mesh.indices !== undefined) {
-    if (!mesh.indices.initialised) {
-      mesh.indices.initialise(device);
-    }
-
     renderPass.setIndexBuffer(
       mesh.indices.indexBuffer,
       mesh.indices.indexFormat

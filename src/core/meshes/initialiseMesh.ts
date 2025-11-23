@@ -8,6 +8,13 @@ function initialiseMesh(
   vertexArray: VertexArray,
   indexArray?: IndexArray
 ): void {
+  if (
+    vertexArray.initialised &&
+    (indexArray === undefined || indexArray?.initialised)
+  ) {
+    return;
+  }
+
   const tangents = calculateVertexTangents(
     vertexArray.rawVertices,
     indexArray?.rawIndices
