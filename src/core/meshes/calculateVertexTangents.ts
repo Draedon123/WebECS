@@ -7,7 +7,7 @@ function calculateVertexTangents(
 ): Quaternion[] {
   const triangleCount = (indices?.length ?? vertices.length) / 3;
 
-  const _tangents: Vector3[] = new Array(vertices.length);
+  const rawTangents: Vector3[] = new Array(vertices.length);
   const bitangents: Vector3[] = new Array(vertices.length);
   const tangents: Quaternion[] = new Array(vertices.length);
 
@@ -41,46 +41,35 @@ function calculateVertexTangents(
       .subtract(Vector3.scale(edge1, deltaUV0.x))
       .scale(inverseDeterminant);
 
-    if (_tangents[index0] === undefined) {
-      _tangents[index0] = tangent;
-    } else {
-      _tangents[index0].add(tangent);
-    }
-
-    if (_tangents[index1] === undefined) {
-      _tangents[index1] = tangent;
-    } else {
-      _tangents[index1].add(tangent);
-    }
-
-    if (_tangents[index2] === undefined) {
-      _tangents[index2] = tangent;
-    } else {
-      _tangents[index2].add(tangent);
-    }
-
-    if (bitangents[index0] === undefined) {
+    if (!rawTangents[index0]) {
+      rawTangents[index0] = tangent;
       bitangents[index0] = bitangent;
     } else {
+      rawTangents[index0].add(tangent);
+      // if the tangent is defined, the bitangent is guaranteed to also be defined
       bitangents[index0].add(bitangent);
     }
 
-    if (bitangents[index1] === undefined) {
+    if (!rawTangents[index1]) {
+      rawTangents[index1] = tangent;
       bitangents[index1] = bitangent;
     } else {
+      rawTangents[index1].add(tangent);
       bitangents[index1].add(bitangent);
     }
 
-    if (bitangents[index2] === undefined) {
+    if (!rawTangents[index2]) {
+      rawTangents[index2] = tangent;
       bitangents[index2] = bitangent;
     } else {
+      rawTangents[index2].add(tangent);
       bitangents[index2].add(bitangent);
     }
   }
 
   for (let i = 0, vertexCount = vertices.length; i < vertexCount; i++) {
     const normal = vertices[i].normal;
-    let tangent = _tangents[i];
+    let tangent = rawTangents[i];
     let bitangent = bitangents[i];
 
     // reconstruct tangent if missing
