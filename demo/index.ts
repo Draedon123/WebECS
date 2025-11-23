@@ -8,6 +8,7 @@ import {
   Loop,
   MeshReference,
   PerspectiveCamera,
+  PointLight,
   Position,
   Renderer,
   Rotation,
@@ -53,6 +54,11 @@ async function main(): Promise<void> {
   entityManager.createEntity(
     new Light(new Vector3(255, 255, 255), 0.7),
     new DirectionalLight(new Vector3(0, 1, 0.2))
+  );
+  entityManager.createEntity(
+    new Light(new Vector3(255, 255, 255), 0.15),
+    new PointLight(20, 0.1),
+    new Position(0, -5, 0)
   );
 
   const skyboxTexture = await Texture.createCubemap(
@@ -140,8 +146,8 @@ async function main(): Promise<void> {
     renderer.render(camera);
   });
 
-  const loadingElement = document.getElementById("loading");
-  loadingElement?.remove();
+  const loadingElement = document.getElementById("loading") as HTMLElement;
+  loadingElement.style.opacity = "0";
 
   loop.start();
 }
