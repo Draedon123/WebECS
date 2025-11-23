@@ -146,18 +146,24 @@ async function main(): Promise<void> {
   loop.start();
 }
 
-main().catch((error) => {
-  const errorMessage =
-    error instanceof Error ? error.message : JSON.stringify(error);
+if (import.meta.env.DEV) {
+  main();
+} else {
+  main().catch((error) => {
+    const errorMessage =
+      error instanceof Error ? error.message : JSON.stringify(error);
 
-  const errorContainer = document.getElementById("error") as HTMLElement;
-  const errorMessageElement = document.getElementById(
-    "error-message"
-  ) as HTMLElement;
+    console.error(errorMessage);
 
-  errorContainer.style.zIndex = "999";
-  errorMessageElement.textContent = errorMessage;
+    const errorContainer = document.getElementById("error") as HTMLElement;
+    const errorMessageElement = document.getElementById(
+      "error-message"
+    ) as HTMLElement;
 
-  const iframe = document.querySelector("iframe") as HTMLIFrameElement;
-  iframe.src = "https://www.youtube.com/embed/6vH1kX_Rii4";
-});
+    errorContainer.style.zIndex = "999";
+    errorMessageElement.textContent = errorMessage;
+
+    const iframe = document.querySelector("iframe") as HTMLIFrameElement;
+    iframe.src = "https://www.youtube.com/embed/6vH1kX_Rii4";
+  });
+}

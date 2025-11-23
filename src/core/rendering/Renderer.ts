@@ -213,22 +213,31 @@ class Renderer {
         entryPoint: "vertexMain",
         buffers: [
           {
-            arrayStride: (3 + 2 + 3) * 4,
+            arrayStride: (3 + 2 + 3 + 3) * 4,
             attributes: [
+              // position
               {
                 shaderLocation: 0,
                 format: "float32x3",
                 offset: 0,
               },
+              // uv
               {
                 shaderLocation: 1,
                 format: "float32x2",
                 offset: 3 * 4,
               },
+              // normal
               {
                 shaderLocation: 2,
                 format: "float32x3",
                 offset: (3 + 2) * 4,
+              },
+              // tangent
+              {
+                shaderLocation: 3,
+                format: "float32x3",
+                offset: (3 + 2 + 3) * 4,
               },
             ],
           },

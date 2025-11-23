@@ -5,6 +5,7 @@ import { Children } from "src/ecs/Children";
 import { Parent } from "src/ecs/Parent";
 import { roundUp } from "./maths";
 import { loadObj } from "./meshes/loaders/obj";
+import { initialiseMesh } from "./meshes/initialiseMesh";
 
 type TextureEntry = {
   texture: Texture;
@@ -124,8 +125,7 @@ class ResourceManager {
           }
         : verticesOrMesh;
 
-    mesh.vertices.initialise(this.device);
-    mesh.indices?.initialise(this.device);
+    initialiseMesh(this.device, mesh.vertices, mesh.indices);
     this.meshes[key] = mesh;
   }
 

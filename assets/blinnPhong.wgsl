@@ -4,6 +4,7 @@ struct Vertex {
   @location(0) position: vec3f,
   @location(1) uv: vec2f,
   @location(2) normal: vec3f,
+  @location(3) tangent: vec3f,
 }
 
 struct VertexOutput {
@@ -11,6 +12,9 @@ struct VertexOutput {
   @location(0) uv: vec2f,
   @location(1) normal: vec3f,
   @location(2) worldPosition: vec4f,
+  @location(3) _t: vec3f,
+  @location(4) _b: vec3f,
+  // @location(5) _n: vec3f,
 }
 
 struct ObjectTransforms {
@@ -55,16 +59,23 @@ struct PointLight {
 fn vertexMain(vertex: Vertex) -> VertexOutput {
   var output: VertexOutput;
 
+  let normal: vec3f = normalize(objectTransforms.normalMatrix * vertex.normal);
+  let tangent: vec3f = normalize(objectTransforms.normalMatrix * vertex.tangent);
+  let bitangent: vec3f = normalize(objectTransforms.normalMatrix * cross(normal, tangent));
+
   output.worldPosition = objectTransforms.modelMatrix * vec4f(vertex.position, 1.0);
   output.position = perspectiveViewMatrix * output.worldPosition;
   output.uv = vertex.uv;
-  output.normal = normalize(objectTransforms.normalMatrix * vertex.normal);
+  output.normal = normal;
+  output._t = tangent;
+  output._b = bitangent;
 
   return output;
 }
 
 @fragment
 fn fragmentMain(input: VertexOutput) -> @location(0) vec4f {
+  let tbn: mat3x3f = mat3x3f(input._t, input._b, input.normal);
   let textureColour: vec3f = textureSample(texture, textureSampler, input.uv).rgb;
 
   let ambient: vec3f = ambientLight.strength * ambientLight.colour;
