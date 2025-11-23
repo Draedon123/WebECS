@@ -1,7 +1,7 @@
-import { createSphereMesh } from "src/core/meshes/createSphereMesh";
-import { DirectionalLight } from "src/core/rendering/scene/DirectionalLight";
 import {
   AmbientLight,
+  createSphereMesh,
+  DirectionalLight,
   EntityManager,
   Light,
   lookAt,
