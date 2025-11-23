@@ -1,5 +1,5 @@
-fn calculatePointLight(light: ptr<storage, PointLight>, normal: vec3f, fragmentPosition: vec3f) -> vec3f {
-  let toLight: vec3f = light.position - fragmentPosition;
+fn calculatePointLight(light: ptr<storage, PointLight>, normal: vec3f, fragmentPosition: vec3f, inverseTBN: mat3x3f) -> vec3f {
+  let toLight: vec3f = inverseTBN * (light.position - fragmentPosition);
   let lightDirection: vec3f = normalize(toLight);
   let distance = length(toLight);
 
@@ -17,8 +17,8 @@ fn calculatePointLight(light: ptr<storage, PointLight>, normal: vec3f, fragmentP
   return diffuseLight;
 }
 
-fn calculateDirectionalLight(normal: vec3f, fragmentPosition: vec3f) -> vec3f {
-  let diffuse: f32 = max(0.0, dot(directionalLight.direction, normal));
+fn calculateDirectionalLight(normal: vec3f, fragmentPosition: vec3f, inverseTBN: mat3x3f) -> vec3f {
+  let diffuse: f32 = max(0.0, dot(inverseTBN * directionalLight.direction, normal));
 
   return diffuse * directionalLight.intensity * directionalLight.colour;
 }
