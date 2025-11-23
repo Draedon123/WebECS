@@ -79,11 +79,11 @@ function createCubeFace(
 
         indices.push(
           currentIndex,
+          currentIndex + resolution + 2,
           currentIndex + 1,
-          currentIndex + resolution + 2,
           currentIndex,
-          currentIndex + resolution + 2,
-          currentIndex + resolution + 1
+          currentIndex + resolution + 1,
+          currentIndex + resolution + 2
         );
       }
     }
