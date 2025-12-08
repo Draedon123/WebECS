@@ -32,6 +32,7 @@ class ResourceManager {
   private readonly meshes: Map<string, MeshEntry>;
   private readonly models: Map<string, ModelEntry>;
   private readonly textureBindGroups: Map<string, GPUBindGroup>;
+  private readonly textureToBindGroupsMap: Map<Texture, string[]>;
 
   private readonly renderer: Renderer;
   private readonly device: GPUDevice;
@@ -46,6 +47,7 @@ class ResourceManager {
     this.meshes = new Map();
     this.models = new Map();
     this.textureBindGroups = new Map();
+    this.textureToBindGroupsMap = new Map();
 
     this.renderer = renderer;
     this.device = device;
@@ -92,6 +94,24 @@ class ResourceManager {
     return this.textures.get(key) ?? null;
   }
 
+  public deleteTexture(key: string): boolean {
+    const texture = this.getTexture(key);
+
+    if (texture === null) {
+      return false;
+    }
+
+    texture.destroy();
+    this.textures.delete(key);
+    const bindGroups = this.textureToBindGroupsMap.get(texture) as string[];
+
+    for (const key of bindGroups) {
+      this.textureBindGroups.delete(key);
+    }
+
+    return true;
+  }
+
   public addMesh(key: string, mesh: MeshEntry): void;
   public addMesh(key: string, vertices: Vertex[], indices?: number[]): void;
   public addMesh(
@@ -119,6 +139,20 @@ class ResourceManager {
 
   public getMesh(key: string): MeshEntry | null {
     return this.meshes.get(key) ?? null;
+  }
+
+  public deleteMesh(key: string): boolean {
+    const mesh = this.getMesh(key);
+
+    if (mesh === null) {
+      return false;
+    }
+
+    this.meshes.delete(key);
+    mesh.vertices.destroy();
+    mesh.indices?.destroy();
+
+    return true;
   }
 
   public async loadModel(
@@ -167,8 +201,37 @@ class ResourceManager {
     }
   }
 
-  public getModel(modelKey: string): ModelEntry | null {
-    return this.models.get(modelKey) ?? null;
+  public getModel(key: string): ModelEntry | null {
+    return this.models.get(key) ?? null;
+  }
+
+  public deleteModel(
+    key: string,
+    deleteOptions: Partial<{ mesh: boolean; textures: boolean }> = {}
+  ): boolean {
+    const model = this.getModel(key);
+
+    if (model === null) {
+      return false;
+    }
+
+    for (const mesh of model) {
+      if (deleteOptions?.mesh) {
+        this.deleteMesh(mesh.meshReference);
+      }
+
+      if (deleteOptions?.textures) {
+        if (mesh.textureReference) {
+          this.deleteTexture(mesh.textureReference);
+        }
+
+        if (mesh.normalMapReference) {
+          this.deleteTexture(mesh.normalMapReference);
+        }
+      }
+    }
+
+    return true;
   }
 
   public spawnModel(modelKey: string): Entity {
@@ -228,6 +291,20 @@ class ResourceManager {
     );
 
     this.textureBindGroups.set(key, bindGroup);
+
+    if (texture) {
+      const textureBindGroups = this.textureToBindGroupsMap.get(texture) ?? [];
+      textureBindGroups.push(key);
+      this.textureToBindGroupsMap.set(texture, textureBindGroups);
+    }
+
+    if (normalMap) {
+      const textureBindGroups =
+        this.textureToBindGroupsMap.get(normalMap) ?? [];
+      textureBindGroups.push(key);
+      this.textureToBindGroupsMap.set(normalMap, textureBindGroups);
+    }
+
     return bindGroup;
   }
 
