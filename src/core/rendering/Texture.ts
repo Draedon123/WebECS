@@ -246,24 +246,24 @@ class Texture extends Component {
 
 function getPointOnCube(face: number, u: number, v: number): Vector3 {
   switch (face) {
-    // left
-    case 0:
-      return new Vector3(-1, v, -u);
     // right
-    case 1:
+    case 0:
       return new Vector3(1, v, -u);
+    // left
+    case 1:
+      return new Vector3(-1, v, u);
     // top
     case 2:
       return new Vector3(v, 1, u);
     // bottom
     case 3:
       return new Vector3(v, -1, -u);
-    // front
-    case 4:
-      return new Vector3(-v, u, -1);
     // back
-    case 5:
+    case 4:
       return new Vector3(u, v, 1);
+    // front
+    case 5:
+      return new Vector3(-u, v, -1);
     default:
       throw new Error(
         `Face must be between 0 and 5 inclusive. Received ${face}`
