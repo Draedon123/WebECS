@@ -21,10 +21,19 @@ self.onmessage = (event: MessageEvent<DataIn>) => {
     () => new ImageData(faceDimensions, faceDimensions)
   );
 
+  const interpolation = settings?.interpolation ?? "bilinear";
   const interpolate =
-    (settings?.interpolation ?? "bilinear")
+    interpolation === "nearest"
       ? sampleNearest
-      : bilinearInterpolate;
+      : interpolation === "bilinear"
+        ? bilinearInterpolate
+        : (x: number, y: number, image: ImageData) =>
+            sampleLanczos(
+              x,
+              y,
+              image,
+              parseInt(interpolation.slice("lanczos".length))
+            );
   const horizontalRotation =
     toRadians(settings?.horizontalRotation ?? 0) % (2 * Math.PI);
   const verticalRotation =
@@ -34,7 +43,6 @@ self.onmessage = (event: MessageEvent<DataIn>) => {
 
     for (let k = 0; k < faceDimensions; k++) {
       for (let j = 0; j < faceDimensions; j++) {
-        // [-1, 1)
         const u = 2 * (j / faceDimensions - 0.5);
         const v = 2 * (k / faceDimensions - 0.5);
 
@@ -149,6 +157,50 @@ function sampleNearest(x: number, y: number, image: ImageData): number[] {
     image.data[offset + 2],
     image.data[offset + 3],
   ];
+}
+
+// https://pixinsight.com/doc/docs/InterpolationAlgorithms/InterpolationAlgorithms.html
+function sampleLanczos(
+  x: number,
+  y: number,
+  image: ImageData,
+  n: number
+): number[] {
+  const value = new Quaternion(0, 0, 0, 0);
+  let weight = 0;
+
+  for (let i = 1 - n; i <= n; i++) {
+    for (let j = 1 - n; j <= n; j++) {
+      const sampleX = Math.floor(x) + i;
+      const sampleY = Math.floor(y) + j;
+      const sampleOffset = 4 * (sampleX + image.width * sampleY);
+      const product =
+        lanczosKernel(i - x + Math.floor(x), n) *
+        lanczosKernel(j - y + Math.floor(y), n);
+
+      weight += product;
+      value.add(
+        new Quaternion(
+          image.data[sampleOffset + 0],
+          image.data[sampleOffset + 1],
+          image.data[sampleOffset + 2],
+          image.data[sampleOffset + 3]
+        ).scale(product)
+      );
+    }
+  }
+
+  value.scale(1 / weight);
+
+  return [value.x, value.y, value.z, value.w];
+}
+
+function lanczosKernel(x: number, n: number): number {
+  return Math.abs(x) <= n ? sinc(x) * sinc(x / n) : 0;
+}
+
+function sinc(x: number): number {
+  return x === 0 ? 1 : Math.sin(Math.PI * x) / (Math.PI * x);
 }
 
 export type { DataIn, DataOut };

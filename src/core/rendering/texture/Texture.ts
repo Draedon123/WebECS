@@ -3,7 +3,7 @@ import EquirectangularWorker from "./equirectangularWorker?worker";
 import type { DataIn, DataOut } from "./equirectangularWorker";
 
 type EquirectangularSettings = {
-  interpolation: "nearest" | "bilinear";
+  interpolation: "nearest" | "bilinear" | `lanczos${number}`;
   /** degrees */
   horizontalRotation: number;
   /** degrees */
