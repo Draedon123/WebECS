@@ -1,4 +1,4 @@
-import { Quaternion, toRadians, Vector3 } from "../maths";
+import { Quaternion, toRadians, Vector3 } from "../../maths";
 import type { EquirectangularSettings } from "./Texture";
 
 type DataIn = {
