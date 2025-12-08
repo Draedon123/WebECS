@@ -2,7 +2,7 @@ import type { PluginOption } from "vite";
 
 function additionalHMR(regexp: RegExp): PluginOption {
   return {
-    name: "WGSL HMR",
+    name: "Additional HMR",
     handleHotUpdate(ctx) {
       if (!ctx.file.match(regexp)) {
         return;
