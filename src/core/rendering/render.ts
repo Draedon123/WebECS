@@ -2,13 +2,13 @@ import { EntityManager, type Entity } from "src/ecs";
 import { Position, Rotation, Scale } from "../transforms";
 import { ResourceManager } from "../ResourceManager";
 import { MeshReference } from "../meshes/MeshReference";
-import { TextureReference } from "./TextureReference";
+import { TextureReference } from "./texture/TextureReference";
 import { Parent } from "src/ecs/Parent";
 import { Matrix4 } from "../maths";
 import { BufferWriter } from "../gpu/BufferWriter";
 import { calculateModelMatrix } from "../transforms/calculateModelMatrix";
 import { calculateNormalMatrix } from "../transforms/calculateNormalMatrix";
-import { NormalMapReference } from "./NormalMapReference";
+import { NormalMapReference } from "./texture/NormalMapReference";
 
 function render(
   resourceManager: ResourceManager,

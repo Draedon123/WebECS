@@ -1,8 +1,8 @@
 import { EntityManager } from "src/ecs";
 import { Matrix4 } from "../maths";
 import { Shader } from "./Shader";
-import { Texture } from "./Texture";
-import { TextureReference } from "./TextureReference";
+import { Texture } from "./texture/Texture";
+import { TextureReference } from "./texture/TextureReference";
 import type { ResourceManager } from "../ResourceManager";
 import { Skybox } from "./scene";
 
