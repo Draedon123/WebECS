@@ -61,8 +61,8 @@ async function main(): Promise<void> {
     new Position(0, -5, 0)
   );
 
-  const skyboxTexture = await Texture.createCubemap(
-    import.meta.env.BASE_URL + "/web-assets/skybox"
+  const skyboxTexture = await Texture.equirectangularToCubemap(
+    import.meta.env.BASE_URL + "/web-assets/skybox.jpg"
   );
 
   renderer.resourceManager.addTexture("Skybox", skyboxTexture);
