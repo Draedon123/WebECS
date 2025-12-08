@@ -30,6 +30,24 @@ class Quaternion {
     return this;
   }
 
+  public scale(factor: number): this {
+    this.x *= factor;
+    this.y *= factor;
+    this.z *= factor;
+    this.w *= factor;
+
+    return this;
+  }
+
+  public add(quaternion: Quaternion): this {
+    this.x += quaternion.x;
+    this.y += quaternion.y;
+    this.z += quaternion.z;
+    this.w += quaternion.w;
+
+    return this;
+  }
+
   public static clone(quaternion: Quaternion): Quaternion {
     return new Quaternion(
       quaternion.x,

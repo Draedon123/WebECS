@@ -1,5 +1,5 @@
 import { Component } from "src/ecs";
-import { Vector3 } from "../maths";
+import { Quaternion, Vector3 } from "../maths";
 
 class Texture extends Component {
   public static readonly tag: string = "Texture";
@@ -103,6 +103,7 @@ class Texture extends Component {
 
   public static async equirectangularToCubemap(
     url: string,
+    interpolation: "nearest" | "bilinear",
     label?: string
   ): Promise<Texture> {
     const image = await new Promise<HTMLImageElement>((resolve) => {
@@ -130,6 +131,10 @@ class Texture extends Component {
       () => new ImageData(faceDimensions, faceDimensions)
     );
 
+    const interpolate =
+      interpolation === "nearest"
+        ? Texture.sampleNearest
+        : Texture.bilinearInterpolate;
     for (let i = 0; i < 6; i++) {
       const face = faces[i];
 
@@ -147,7 +152,7 @@ class Texture extends Component {
           const x = image.width * (0.5 + theta / (2 * Math.PI));
           const y = image.height * (0.5 + phi / Math.PI);
 
-          const pixel = Texture.sampleNearest(x, y, imageData);
+          const pixel = interpolate(x, y, imageData);
           const offset = 4 * (j + faceDimensions * k);
 
           face.data[offset + 0] = pixel[0];
@@ -174,6 +179,60 @@ class Texture extends Component {
       image.data[offset + 2],
       image.data[offset + 3],
     ];
+  }
+
+  // https://en.wikipedia.org/wiki/Bilinear_interpolation
+  private static bilinearInterpolate(
+    x: number,
+    y: number,
+    image: ImageData
+  ): number[] {
+    const x1 = Math.floor(x);
+    const x2 = x1 + 1;
+    const y1 = Math.floor(y);
+    const y2 = y1 + 1;
+
+    const q11Offset = 4 * (x1 + image.width * y1);
+    const q12Offset = 4 * (x1 + image.width * y2);
+    const q21Offset = 4 * (x2 + image.width * y1);
+    const q22Offset = 4 * (x2 + image.width * y2);
+
+    const q11 = new Quaternion(
+      image.data[q11Offset + 0],
+      image.data[q11Offset + 1],
+      image.data[q11Offset + 2],
+      image.data[q11Offset + 3]
+    );
+
+    const q12 = new Quaternion(
+      image.data[q12Offset + 0],
+      image.data[q12Offset + 1],
+      image.data[q12Offset + 2],
+      image.data[q12Offset + 3]
+    );
+
+    const q21 = new Quaternion(
+      image.data[q21Offset + 0],
+      image.data[q21Offset + 1],
+      image.data[q21Offset + 2],
+      image.data[q21Offset + 3]
+    );
+
+    const q22 = new Quaternion(
+      image.data[q22Offset + 0],
+      image.data[q22Offset + 1],
+      image.data[q22Offset + 2],
+      image.data[q22Offset + 3]
+    );
+
+    const result = q11
+      .scale((x2 - x) * (y2 - y))
+      .add(q12.scale((x2 - x) * (y - y1)))
+      .add(q21.scale((x - x1) * (y2 - y)))
+      .add(q22.scale((x - x1) * (y - y1)))
+      .scale(1 / ((x2 - x1) * (y2 - y1)));
+
+    return [result.x, result.y, result.z, result.w];
   }
 
   protected static toBitmap(urls: string[]): Promise<ImageBitmap[]> {
