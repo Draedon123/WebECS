@@ -11,3 +11,4 @@ This repo consists of not only the framework, but a working demo
 - ISS Model from https://solarsystem.nasa.gov/gltf_embed/2378/
 - Planet textures from https://www.texturesforplanets.com/texture-packs.shtml
 - Cat loading gif from https://tenor.com/en-GB/view/cat-spinning-gif-10232413348886076857
+- [Skybox Texture](https://www.eso.org/public/images/eso0932a/)
