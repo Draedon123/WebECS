@@ -139,7 +139,21 @@ class Texture extends Component {
         name: (label ?? "Texture") + " Equirectangular to Cubemap Worker",
       });
 
+      const actualSettings: EquirectangularSettings = {
+        interpolation: settings.interpolation ?? "bilinear",
+        horizontalRotation: settings.horizontalRotation ?? 0,
+        verticalRotation: settings.verticalRotation ?? 0,
+      };
+      const startTime = performance.now();
+
       worker.onmessage = (event: MessageEvent<DataOut>) => {
+        const endTime = performance.now();
+        const elapsed_ms = endTime - startTime;
+
+        console.debug(
+          `Took ${elapsed_ms.toFixed(2)}ms to convert equirectangular projected panorama to cubemap.\nImage dimensions: ${image.width}x${image.height}\nInterpolation algorithm: ${actualSettings.interpolation}`
+        );
+
         const texture = new Texture(
           event.data.faces,
           event.data.faceDimensions,
@@ -154,7 +168,7 @@ class Texture extends Component {
 
       worker.postMessage({
         image: imageData,
-        settings,
+        settings: actualSettings,
       } satisfies DataIn);
     });
   }

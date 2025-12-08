@@ -3,7 +3,7 @@ import type { EquirectangularSettings } from "./Texture";
 
 type DataIn = {
   image: ImageData;
-  settings?: Partial<EquirectangularSettings>;
+  settings: EquirectangularSettings;
 };
 
 type DataOut = {
@@ -21,23 +21,21 @@ self.onmessage = (event: MessageEvent<DataIn>) => {
     () => new ImageData(faceDimensions, faceDimensions)
   );
 
-  const interpolation = settings?.interpolation ?? "bilinear";
   const interpolate =
-    interpolation === "nearest"
+    settings.interpolation === "nearest"
       ? sampleNearest
-      : interpolation === "bilinear"
+      : settings.interpolation === "bilinear"
         ? bilinearInterpolate
         : (x: number, y: number, image: ImageData) =>
             sampleLanczos(
               x,
               y,
               image,
-              parseInt(interpolation.slice("lanczos".length))
+              parseInt(settings.interpolation.slice("lanczos".length))
             );
   const horizontalRotation =
-    toRadians(settings?.horizontalRotation ?? 0) % (2 * Math.PI);
-  const verticalRotation =
-    toRadians(settings?.verticalRotation ?? 0) % (2 * Math.PI);
+    toRadians(settings.horizontalRotation) % (2 * Math.PI);
+  const verticalRotation = toRadians(settings.verticalRotation) % (2 * Math.PI);
   for (let i = 0; i < 6; i++) {
     const face = faces[i];
 
