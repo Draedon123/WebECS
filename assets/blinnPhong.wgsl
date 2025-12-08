@@ -61,9 +61,9 @@ struct Camera {
 @group(0) @binding(4) var <storage, read> pointLights: PointLights;
 
 @group(1) @binding(0) var <uniform> objectData: ObjectData;
-@group(1) @binding(1) var texture: texture_2d<f32>;
 
-@group(2) @binding(0) var normalMap: texture_2d<f32>;
+@group(2) @binding(0) var texture: texture_2d<f32>;
+@group(2) @binding(1) var normalMap: texture_2d<f32>;
 
 @vertex
 fn vertexMain(vertex: Vertex) -> VertexOutput {

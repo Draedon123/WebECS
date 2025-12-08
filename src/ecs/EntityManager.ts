@@ -22,6 +22,7 @@ class EntityManager {
 
   private readonly entityComponentMap: Map<Entity, Component[]>;
   private readonly componentEntityMap: Map<string, Entity[]>;
+  private readonly components: Map<number, Component>;
 
   private nextId: number;
   private readonly freeIds: Entity[];
@@ -29,6 +30,7 @@ class EntityManager {
   private constructor() {
     this.entityComponentMap = new Map();
     this.componentEntityMap = new Map();
+    this.components = new Map();
 
     this.nextId = 0;
     this.freeIds = [];
@@ -113,6 +115,7 @@ class EntityManager {
       const map = this.componentEntityMap.get(component.tag) as Entity[];
 
       map.splice(map.indexOf(entity), 1);
+      this.components.delete(component.id);
     }
   }
 
@@ -130,6 +133,7 @@ class EntityManager {
     newComponentMap.push(entity);
 
     this.componentEntityMap.set(component.tag, newComponentMap);
+    this.components.set(component.id, component);
   }
 
   public getComponent<T extends Component = Component>(

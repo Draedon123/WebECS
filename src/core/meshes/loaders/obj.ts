@@ -7,8 +7,8 @@ import { gunzipSync, strFromU8 } from "fflate";
 
 type Material = {
   name: string;
-  texture: Texture;
-  normalMap?: Texture;
+  texture?: number;
+  normalMap?: number;
 };
 
 type Mesh = MeshEntry & {
@@ -16,9 +16,15 @@ type Mesh = MeshEntry & {
   materialName: string;
 };
 
+type NamedTexture = {
+  texture: Texture;
+  name: string;
+};
+
 async function loadObj(filePath: string): Promise<{
   meshes: Mesh[];
   materials: Record<string, Material>;
+  textures: Record<number, NamedTexture>;
 }> {
   let fileContents: string;
   if (filePath.endsWith(".gz")) {
@@ -41,6 +47,7 @@ async function loadObj(filePath: string): Promise<{
   const textureCoordinates: Vector2[] = [];
   const vertexNormals: Vector3[] = [];
   const materials: Record<string, Material> = {};
+  let textures: Record<number, NamedTexture> = {};
 
   const meshes: Mesh[] = [];
 
@@ -60,7 +67,8 @@ async function loadObj(filePath: string): Promise<{
           parts.slice(1).join(" ");
         const loadedMaterials = await loadMtl(mtlPath);
 
-        for (const material of loadedMaterials) {
+        textures = loadedMaterials.textures;
+        for (const material of loadedMaterials.materials) {
           materials[material.name] = material;
         }
 
@@ -171,13 +179,17 @@ async function loadObj(filePath: string): Promise<{
   return {
     meshes,
     materials,
+    textures,
   };
 }
 
-async function loadMtl(filePath: string): Promise<Material[]> {
+async function loadMtl(
+  filePath: string
+): Promise<{ materials: Material[]; textures: Record<number, NamedTexture> }> {
   const fileContents = await (await fetch(filePath)).text();
   const rawMaterialsData = fileContents.split(/(newmtl)/);
   const materials: Material[] = [];
+  const textures: Record<number, NamedTexture> = [];
   const texturePromises: Promise<void>[] = [];
 
   for (let i = 0; i < rawMaterialsData.length; i++) {
@@ -204,7 +216,14 @@ async function loadMtl(filePath: string): Promise<Material[]> {
           const g = parseFloat(parts[2]) * 255;
           const b = parseFloat(parts[3]) * 255;
 
-          material.texture = Texture.colour(r, g, b);
+          const texture = Texture.colour(r, g, b);
+
+          material.texture = texture.id;
+          textures[texture.id] = {
+            texture,
+            name: material.name + "_Kd",
+          };
+
           break;
         }
 
@@ -216,7 +235,11 @@ async function loadMtl(filePath: string): Promise<Material[]> {
             parts.slice(1).join(" ");
           texturePromises.push(
             Texture.fetch([url]).then((texture) => {
-              material.texture = texture;
+              material.texture = texture.id;
+              textures[texture.id] = {
+                texture,
+                name: material.name + "_map_kD",
+              };
             })
           );
 
@@ -232,7 +255,11 @@ async function loadMtl(filePath: string): Promise<Material[]> {
 
           texturePromises.push(
             Texture.fetch([url]).then((normalMap) => {
-              material.normalMap = normalMap;
+              material.normalMap = normalMap.id;
+              textures[normalMap.id] = {
+                texture: normalMap,
+                name: material.name + "_norm",
+              };
             })
           );
         }
@@ -241,14 +268,10 @@ async function loadMtl(filePath: string): Promise<Material[]> {
 
     await Promise.all(texturePromises);
 
-    if (!material.texture) {
-      material.texture = Texture.colour(255, 255, 255);
-    }
-
     materials.push(material);
   }
 
-  return materials;
+  return { materials, textures };
 }
 
 export { loadObj };

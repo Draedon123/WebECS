@@ -28,6 +28,11 @@ class VertexArray extends Component {
   public get vertexCount(): number {
     return this.rawVertices.length;
   }
+
+  public destroy(): void {
+    this.rawVertices.length = 0;
+    this.vertexBuffer?.destroy();
+  }
 }
 
 export { VertexArray, type Vertex };

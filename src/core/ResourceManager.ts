@@ -12,12 +12,6 @@ import { roundUp } from "./maths";
 import { loadObj } from "./meshes/loaders/obj";
 import { initialiseMesh } from "./meshes/initialiseMesh";
 
-type TextureEntry = {
-  texture: Texture;
-  textureBindGroup?: GPUBindGroup;
-  normalMapBindGroup?: GPUBindGroup;
-};
-
 type MeshEntry = {
   vertices: VertexArray;
   indices?: IndexArray;
@@ -25,7 +19,7 @@ type MeshEntry = {
 
 type ModelEntry = {
   meshReference: string;
-  textureReference: string;
+  textureReference?: string;
   normalMapReference?: string;
 }[];
 
@@ -34,21 +28,24 @@ type ModelType = "obj";
 class ResourceManager {
   public static readonly DEFAULT_TEXTURE_KEY: string = "default";
 
-  private readonly textures: Record<string, TextureEntry>;
-  private readonly meshes: Record<string, MeshEntry>;
-  private readonly models: Record<string, ModelEntry>;
+  private readonly textures: Map<string, Texture>;
+  private readonly meshes: Map<string, MeshEntry>;
+  private readonly models: Map<string, ModelEntry>;
+  private readonly textureBindGroups: Map<string, GPUBindGroup>;
 
   private readonly renderer: Renderer;
   private readonly device: GPUDevice;
 
+  public readonly transformsBindGroup: GPUBindGroup;
   public readonly transformsBuffer: GPUBuffer;
   public readonly transformByteLength: number;
   public readonly transformsPadding: number;
 
   constructor(renderer: Renderer, device: GPUDevice, maxObjects: number) {
-    this.textures = {};
-    this.meshes = {};
-    this.models = {};
+    this.textures = new Map();
+    this.meshes = new Map();
+    this.models = new Map();
+    this.textureBindGroups = new Map();
 
     this.renderer = renderer;
     this.device = device;
@@ -66,60 +63,33 @@ class ResourceManager {
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
+    this.transformsBindGroup = device.createBindGroup({
+      label: "Transforms Bind Group",
+      layout: renderer.perObjectBindGroupLayout,
+      entries: [
+        {
+          binding: 0,
+          resource: {
+            buffer: this.transformsBuffer,
+            size: this.transformByteLength + this.transformsPadding,
+          },
+        },
+      ],
+    });
+
     const defaultTexture = Texture.colour(255, 255, 255);
     defaultTexture.initialise(device);
     this.addTexture(ResourceManager.DEFAULT_TEXTURE_KEY, defaultTexture);
   }
 
   public addTexture(key: string, texture: Texture): void {
-    if (key in this.textures) {
-      this.textures[key].texture?.texture.destroy();
-    }
-
+    this.getTexture(key)?.destroy();
     texture.initialise(this.device);
-
-    this.textures[key] = {
-      texture,
-      textureBindGroup:
-        texture.texture.depthOrArrayLayers === 1
-          ? this.device.createBindGroup({
-              layout: this.renderer.perObjectBindGroupLayout,
-              entries: [
-                {
-                  binding: 0,
-                  resource: {
-                    buffer: this.transformsBuffer,
-                    size: this.transformByteLength + this.transformsPadding,
-                  },
-                },
-                {
-                  binding: 1,
-                  resource: texture.texture.createView(),
-                },
-              ],
-            })
-          : undefined,
-      normalMapBindGroup:
-        texture.texture.depthOrArrayLayers === 1
-          ? this.device.createBindGroup({
-              layout: this.renderer.normalMapBindGroupLayout,
-              entries: [
-                {
-                  binding: 0,
-                  resource: texture.texture.createView(),
-                },
-              ],
-            })
-          : undefined,
-    };
+    this.textures.set(key, texture);
   }
 
-  public getTexture(key: string): TextureEntry | null {
-    return (
-      this.textures[key] ??
-      this.textures[ResourceManager.DEFAULT_TEXTURE_KEY] ??
-      null
-    );
+  public getTexture(key: string): Texture | null {
+    return this.textures.get(key) ?? null;
   }
 
   public addMesh(key: string, mesh: MeshEntry): void;
@@ -129,9 +99,10 @@ class ResourceManager {
     verticesOrMesh: Vertex[] | MeshEntry,
     indices?: number[]
   ): void {
-    if (key in this.meshes) {
-      this.meshes[key].vertices.vertexBuffer?.destroy();
-      this.meshes[key]?.indices?.indexBuffer?.destroy();
+    const existingMesh = this.meshes.get(key);
+    if (existingMesh) {
+      existingMesh.vertices.destroy();
+      existingMesh.indices?.destroy();
     }
 
     const mesh: MeshEntry =
@@ -143,11 +114,11 @@ class ResourceManager {
         : verticesOrMesh;
 
     initialiseMesh(this.device, mesh.vertices, mesh.indices);
-    this.meshes[key] = mesh;
+    this.meshes.set(key, mesh);
   }
 
   public getMesh(key: string): MeshEntry | null {
-    return this.meshes[key] ?? null;
+    return this.meshes.get(key) ?? null;
   }
 
   public async loadModel(
@@ -159,12 +130,8 @@ class ResourceManager {
       case "obj": {
         const model = await loadObj(modelPath);
 
-        for (const material of Object.values(model.materials)) {
-          this.addTexture(material.name, material.texture);
-
-          if (material.normalMap) {
-            this.addTexture(material.name + "NormalMap", material.normalMap);
-          }
+        for (const texture of Object.values(model.textures)) {
+          this.addTexture(texture.name, texture.texture);
         }
 
         for (let i = 0; i < model.meshes.length; i++) {
@@ -172,13 +139,23 @@ class ResourceManager {
           this.addMesh(mesh.name, mesh);
         }
 
-        this.models[modelKey] = Object.values(model.meshes).map((mesh) => ({
-          meshReference: mesh.name,
-          textureReference: mesh.materialName,
-          normalMapReference: model.materials[mesh.materialName].normalMap
-            ? mesh.materialName + "NormalMap"
-            : undefined,
-        }));
+        this.models.set(
+          modelKey,
+          Object.values(model.meshes).map((mesh) => {
+            const texture = model.materials[mesh.materialName].texture;
+            const normalMap = model.materials[mesh.materialName].normalMap;
+
+            return {
+              meshReference: mesh.name,
+              textureReference: texture
+                ? model.textures[texture].name
+                : undefined,
+              normalMapReference: normalMap
+                ? model.textures[normalMap].name
+                : undefined,
+            };
+          })
+        );
 
         break;
       }
@@ -191,29 +168,32 @@ class ResourceManager {
   }
 
   public getModel(modelKey: string): ModelEntry | null {
-    return this.models[modelKey] ?? null;
+    return this.models.get(modelKey) ?? null;
   }
 
   public spawnModel(modelKey: string): Entity {
-    if (!(modelKey in this.models)) {
+    const model = this.getModel(modelKey);
+
+    if (model === null) {
       throw new Error(`Model with key ${modelKey} not found`);
     }
 
     const entityManager = EntityManager.getInstance();
-    const model = this.models[modelKey];
     const children = new Children();
     const modelEntity = entityManager.createEntity(children);
 
     for (const mesh of model) {
       const meshReference = new MeshReference(mesh.meshReference);
-      const textureReference = new TextureReference(mesh.textureReference);
       const parent = new Parent(modelEntity);
 
-      const child = entityManager.createEntity(
-        meshReference,
-        textureReference,
-        parent
-      );
+      const child = entityManager.createEntity(meshReference, parent);
+
+      if (mesh.textureReference) {
+        entityManager.addComponent(
+          child,
+          new TextureReference(mesh.textureReference)
+        );
+      }
 
       if (mesh.normalMapReference) {
         entityManager.addComponent(
@@ -227,7 +207,56 @@ class ResourceManager {
 
     return modelEntity;
   }
+
+  public getTextureBindGroup(
+    texture?: Texture,
+    normalMap?: Texture
+  ): GPUBindGroup {
+    const key = this.getTextureBindGroupsKey(texture, normalMap);
+    const existingBindGroup = this.textureBindGroups.get(key);
+
+    if (existingBindGroup) {
+      return existingBindGroup;
+    }
+
+    const bindGroup = this.createTextureBindGroup(
+      // default texture is guaranteed to be defined
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      texture ?? this.getTexture(ResourceManager.DEFAULT_TEXTURE_KEY)!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      normalMap ?? this.getTexture(ResourceManager.DEFAULT_TEXTURE_KEY)!
+    );
+
+    this.textureBindGroups.set(key, bindGroup);
+    return bindGroup;
+  }
+
+  private createTextureBindGroup(
+    texture: Texture,
+    normalMap: Texture
+  ): GPUBindGroup {
+    return this.device.createBindGroup({
+      layout: this.renderer.texureBindGroupLayout,
+      entries: [
+        {
+          binding: 0,
+          resource: texture.texture.createView(),
+        },
+        {
+          binding: 1,
+          resource: normalMap.texture.createView(),
+        },
+      ],
+    });
+  }
+
+  private getTextureBindGroupsKey(
+    texture?: Texture,
+    normalMap?: Texture
+  ): string {
+    return `${texture?.id ?? -1},${normalMap?.id ?? -1}`;
+  }
 }
 
 export { ResourceManager };
-export type { TextureEntry, MeshEntry };
+export type { MeshEntry };

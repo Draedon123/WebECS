@@ -34,7 +34,7 @@ class Renderer {
 
   public readonly resourceManager: ResourceManager;
   public readonly perObjectBindGroupLayout: GPUBindGroupLayout;
-  public readonly normalMapBindGroupLayout: GPUBindGroupLayout;
+  public readonly texureBindGroupLayout: GPUBindGroupLayout;
   private readonly cameraBuffer: GPUBuffer;
   private readonly ambientLightBuffer: GPUBuffer;
   private readonly directionalLightBuffer: GPUBuffer;
@@ -93,18 +93,18 @@ class Renderer {
           buffer: { type: "uniform", hasDynamicOffset: true },
           visibility: GPUShaderStage.VERTEX,
         },
-        {
-          binding: 1,
-          texture: {},
-          visibility: GPUShaderStage.FRAGMENT,
-        },
       ],
     });
-    this.normalMapBindGroupLayout = this.device.createBindGroupLayout({
+    this.texureBindGroupLayout = this.device.createBindGroupLayout({
       label: "Renderer Normal Map Bind Group Layout",
       entries: [
         {
           binding: 0,
+          texture: {},
+          visibility: GPUShaderStage.FRAGMENT,
+        },
+        {
+          binding: 1,
           texture: {},
           visibility: GPUShaderStage.FRAGMENT,
         },
@@ -216,7 +216,7 @@ class Renderer {
       bindGroupLayouts: [
         bindGroup0Layout,
         this.perObjectBindGroupLayout,
-        this.normalMapBindGroupLayout,
+        this.texureBindGroupLayout,
       ],
     });
 

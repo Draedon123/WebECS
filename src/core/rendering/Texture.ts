@@ -59,6 +59,11 @@ class Texture extends Component {
     }
   }
 
+  public destroy(): void {
+    this.texture?.destroy();
+    this.sources.length = 0;
+  }
+
   public static async fetch(urls: string[], label?: string): Promise<Texture> {
     const bitmaps = await Texture.toBitmap(urls);
 

@@ -57,7 +57,7 @@ function renderObject(
     textureReference?.textureKey ?? ResourceManager.DEFAULT_TEXTURE_KEY;
   const texture = resourceManager.getTexture(textureKey);
 
-  if (texture === null || texture.textureBindGroup === undefined) {
+  if (texture === null) {
     console.error(`No valid texture found with key ${textureKey}`);
     return;
   }
@@ -118,11 +118,14 @@ function renderObject(
   );
 
   renderPass.setVertexBuffer(0, mesh.vertices.vertexBuffer);
-  renderPass.setBindGroup(1, texture.textureBindGroup, [
+  renderPass.setBindGroup(1, resourceManager.transformsBindGroup, [
     objectIndex *
       (resourceManager.transformByteLength + resourceManager.transformsPadding),
   ]);
-  renderPass.setBindGroup(2, normalMap?.normalMapBindGroup);
+  renderPass.setBindGroup(
+    2,
+    resourceManager.getTextureBindGroup(texture, normalMap ?? undefined)
+  );
 
   if (mesh.indices !== undefined) {
     renderPass.setIndexBuffer(

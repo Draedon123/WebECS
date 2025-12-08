@@ -116,9 +116,7 @@ class SkyboxRenderer {
         "TextureReference"
       ) as TextureReference;
 
-    const texture = resourceManager.getTexture(
-      textureReference.textureKey
-    )?.texture;
+    const texture = resourceManager.getTexture(textureReference.textureKey);
 
     if (!texture) {
       console.error(`No texture with key ${textureReference.textureKey} found`);

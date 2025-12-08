@@ -31,6 +31,11 @@ class IndexArray extends Component {
   public get indexCount(): number {
     return this.rawIndices.length;
   }
+
+  public destroy(): void {
+    this.rawIndices.length = 0;
+    this.indexBuffer?.destroy();
+  }
 }
 
 export { IndexArray };
