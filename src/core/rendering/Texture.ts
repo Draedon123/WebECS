@@ -1,5 +1,13 @@
 import { Component } from "src/ecs";
-import { Quaternion, Vector3 } from "../maths";
+import { Quaternion, toRadians, Vector3 } from "../maths";
+
+type EquirectangularSettings = {
+  interpolation: "nearest" | "bilinear";
+  /** degrees */
+  horizontalRotation: number;
+  /** degrees */
+  verticalRotation: number;
+};
 
 class Texture extends Component {
   public static readonly tag: string = "Texture";
@@ -103,7 +111,7 @@ class Texture extends Component {
 
   public static async equirectangularToCubemap(
     url: string,
-    interpolation: "nearest" | "bilinear",
+    settings: Partial<EquirectangularSettings> = {},
     label?: string
   ): Promise<Texture> {
     const image = await new Promise<HTMLImageElement>((resolve) => {
@@ -132,9 +140,13 @@ class Texture extends Component {
     );
 
     const interpolate =
-      interpolation === "nearest"
+      (settings.interpolation ?? "bilinear")
         ? Texture.sampleNearest
         : Texture.bilinearInterpolate;
+    const horizontalRotation =
+      toRadians(settings.horizontalRotation ?? 0) % (2 * Math.PI);
+    const verticalRotation =
+      toRadians(settings.verticalRotation ?? 0) % (2 * Math.PI);
     for (let i = 0; i < 6; i++) {
       const face = faces[i];
 
@@ -146,11 +158,12 @@ class Texture extends Component {
 
           const point = getPointOnCube(i, u, v);
 
-          const phi = Math.asin(point.y / Math.hypot(u, v, 1));
-          const theta = Math.atan2(point.x, point.z);
+          const phi =
+            Math.asin(point.y / Math.hypot(u, v, 1)) + verticalRotation;
+          const theta = Math.atan2(point.x, point.z) + horizontalRotation;
 
-          const x = image.width * (0.5 + theta / (2 * Math.PI));
-          const y = image.height * (0.5 + phi / Math.PI);
+          const x = (image.width * (0.5 + theta / (2 * Math.PI))) % image.width;
+          const y = (image.height * (0.5 + phi / Math.PI)) % image.height;
 
           const pixel = interpolate(x, y, imageData);
           const offset = 4 * (j + faceDimensions * k);
