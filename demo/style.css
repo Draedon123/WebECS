@@ -30,6 +30,7 @@ canvas,
   z-index: 998;
 
   transition: opacity 0.5s ease-in-out;
+  pointer-events: none;
 }
 
 #error {
