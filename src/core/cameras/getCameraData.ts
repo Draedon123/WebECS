@@ -38,7 +38,7 @@ function getCameraData(camera: Entity): CameraData {
     return { perspectiveViewMatrix: new Matrix4(), position: new Vector3() };
   }
 
-  const perspectiveViewMatrix = cameraComponent.calculatePerspectiveViewMatrix(
+  const perspectiveViewMatrix = cameraComponent.getViewProjectionMatrix(
     cameraPosition,
     cameraRotation
   );

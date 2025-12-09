@@ -66,6 +66,15 @@ class Quaternion {
     return this;
   }
 
+  public equals(quaternion: Quaternion): boolean {
+    return (
+      this.x === quaternion.x &&
+      this.y === quaternion.y &&
+      this.z === quaternion.z &&
+      this.w === quaternion.w
+    );
+  }
+
   public static invert(quaternion: Quaternion): Quaternion {
     return Quaternion.clone(quaternion).invert();
   }

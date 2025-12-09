@@ -73,6 +73,10 @@ class Vector3 {
     return this;
   }
 
+  public equals(vector3: Vector3): boolean {
+    return this.x === vector3.x && this.y === vector3.y && this.z === vector3.z;
+  }
+
   public static normalise(vector3: Vector3): Vector3 {
     return vector3.clone().normalise();
   }
