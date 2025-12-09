@@ -116,6 +116,8 @@ class ResourceManager {
     modelKey: string,
     type: ModelType
   ): Promise<void> {
+    const start = performance.now();
+
     switch (type) {
       case "obj": {
         const model = await loadObj(modelPath);
@@ -155,6 +157,13 @@ class ResourceManager {
         break;
       }
     }
+
+    const end = performance.now();
+    const elapsed_ms = end - start;
+
+    console.debug(
+      `Took ${elapsed_ms.toFixed(2)}ms to load the model "${modelKey}"`
+    );
   }
 
   public getModel(key: string): ModelEntry | null {

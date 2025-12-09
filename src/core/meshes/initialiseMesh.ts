@@ -15,6 +15,8 @@ function initialiseMesh(
     return;
   }
 
+  const start = performance.now();
+
   const tangents = calculateVertexTangents(
     vertexArray.rawVertices,
     indexArray?.rawIndices
@@ -78,6 +80,14 @@ function initialiseMesh(
 
     device.queue.writeBuffer(vertexArray.vertexBuffer, 0, vertices);
   }
+
+  const end = performance.now();
+  const elapsed_ms = end - start;
+
+  console.debug(
+    `Took ${elapsed_ms.toFixed()}ms to initialise Vertex Array "${vertexArray.label}"` +
+      (indexArray ? ` and Index Array "${indexArray?.label}"` : "")
+  );
 }
 
 export { initialiseMesh };
