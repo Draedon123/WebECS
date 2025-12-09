@@ -149,7 +149,8 @@ class Renderer {
     });
 
     const shader = await Shader.fetch(
-      import.meta.env.BASE_URL + "/blinnPhong.wgsl"
+      import.meta.env.BASE_URL + "/blinnPhong.wgsl",
+      "Blinn Phong Shader"
     );
     shader.initialise(this.device);
 
@@ -284,8 +285,11 @@ class Renderer {
   }
 
   public render(camera: Entity): void {
-    const encoder = this.device.createCommandEncoder();
+    const encoder = this.device.createCommandEncoder({
+      label: "Renderer Command Encoder",
+    });
     const renderPass = encoder.beginRenderPass({
+      label: "Renderer Render Pass",
       colorAttachments: [
         {
           loadOp: "clear",

@@ -6,6 +6,8 @@ function createSphereMesh(
   resolution: number,
   radius: number = 1
 ): { vertices: Vertex[]; indices: number[] } {
+  const start = performance.now();
+
   const cube = createCubeMesh(radius * 2, resolution);
 
   cube.vertices.forEach((vertex) => {
@@ -43,6 +45,13 @@ function createSphereMesh(
 
     vertex.uv = new Vector2(u, v);
   });
+
+  const end = performance.now();
+  const elapsed_ms = end - start;
+
+  console.debug(
+    `Took ${elapsed_ms.toFixed(2)}ms to create sphere mesh with radius ${radius} and resolution ${resolution}`
+  );
 
   return cube;
 }

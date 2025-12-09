@@ -93,6 +93,7 @@ class TextureManager {
     normalMap: Texture
   ): GPUBindGroup {
     return this.device.createBindGroup({
+      label: `Texture Bind Group. Texture: ${texture.label}. Normal Map: ${normalMap.label}`,
       layout: this.renderer.texureBindGroupLayout,
       entries: [
         {

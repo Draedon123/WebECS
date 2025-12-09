@@ -63,11 +63,15 @@ async function main(): Promise<void> {
 
   const skyboxTexture = await Texture.equirectangularToCubemap(
     import.meta.env.BASE_URL + "/web-assets/skybox.jpg",
-    { interpolation: "lanczos1", horizontalRotation: 180 }
+    { interpolation: "lanczos1", horizontalRotation: 180 },
+    "Milky Way Skybox"
   );
 
-  renderer.resourceManager.addTexture("Skybox", skyboxTexture);
-  entityManager.createEntity(new Skybox(), new TextureReference("Skybox"));
+  renderer.resourceManager.addTexture("MilkyWaySkybox", skyboxTexture);
+  entityManager.createEntity(
+    new Skybox(),
+    new TextureReference("MilkyWaySkybox")
+  );
 
   const planetTextures = [
     "Alpine",
@@ -90,9 +94,11 @@ async function main(): Promise<void> {
 
   await Promise.all(
     planetTextures.map(async (planet) => {
-      const texture = await Texture.fetch([
-        import.meta.env.BASE_URL + `/web-assets/planets/${planet}.png`,
-      ]);
+      const texture = await Texture.fetch(
+        [import.meta.env.BASE_URL + `/web-assets/planets/${planet}.png`],
+        planet
+      );
+
       renderer.resourceManager.addTexture(planet, texture);
     })
   );

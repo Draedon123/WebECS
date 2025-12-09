@@ -5,6 +5,8 @@ function createCubeMesh(
   sideLength: number = 1,
   resolution: number = 1
 ): { vertices: Vertex[]; indices: number[] } {
+  const start = performance.now();
+
   const vertices: Vertex[] = [];
   const indices: number[] = [];
 
@@ -35,6 +37,13 @@ function createCubeMesh(
       indices.push(index);
     }
   }
+
+  const end = performance.now();
+  const elapsed_ms = end - start;
+
+  console.debug(
+    `Took ${elapsed_ms.toFixed(2)}ms to create cube mesh with side length ${sideLength} and resolution ${resolution}`
+  );
 
   return {
     vertices: vertices,

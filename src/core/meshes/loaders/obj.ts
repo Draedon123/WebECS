@@ -79,15 +79,18 @@ async function loadObj(filePath: string): Promise<{
         if (meshes[meshes.length - 1].materialName === "") {
           meshes[meshes.length - 1].materialName = parts[1];
         } else {
-          meshes[meshes.length - 1].indices = new IndexArray(indices);
+          const mesh = meshes[meshes.length - 1];
+          const meshName = "_" + mesh.name;
+
+          mesh.indices = new IndexArray(indices, meshName + " Index Array");
 
           vertices = [];
           indices = [];
 
           meshes.push({
-            name: "_" + meshes[meshes.length - 1].name,
+            name: meshName,
             materialName: parts[1],
-            vertices: new VertexArray(vertices),
+            vertices: new VertexArray(vertices, meshName + " Vertex Array"),
           });
         }
 
@@ -98,7 +101,10 @@ async function loadObj(filePath: string): Promise<{
         const meshName = parts[1];
 
         if (meshes.length > 0) {
-          meshes[meshes.length - 1].indices = new IndexArray(indices);
+          meshes[meshes.length - 1].indices = new IndexArray(
+            indices,
+            meshName + " Index Array"
+          );
         }
 
         indices = [];
@@ -107,7 +113,7 @@ async function loadObj(filePath: string): Promise<{
         meshes.push({
           name: meshName,
           materialName: "",
-          vertices: new VertexArray(vertices),
+          vertices: new VertexArray(vertices, meshName + " Vertex Array"),
         });
         break;
       }
@@ -174,7 +180,10 @@ async function loadObj(filePath: string): Promise<{
     }
   }
 
-  meshes[meshes.length - 1].indices = new IndexArray(indices);
+  meshes[meshes.length - 1].indices = new IndexArray(
+    indices,
+    meshes[meshes.length - 1].name + " Index Array"
+  );
 
   return {
     meshes,
@@ -216,12 +225,13 @@ async function loadMtl(
           const g = parseFloat(parts[2]) * 255;
           const b = parseFloat(parts[3]) * 255;
 
-          const texture = Texture.colour(r, g, b);
+          const textureName = material.name + "_Kd";
+          const texture = Texture.colour(r, g, b, 255, textureName);
 
           material.texture = texture.id;
           textures[texture.id] = {
             texture,
-            name: material.name + "_Kd",
+            name: textureName,
           };
 
           break;
@@ -233,12 +243,15 @@ async function loadMtl(
             filePath.split("/").slice(0, -1).join("/") +
             "/" +
             parts.slice(1).join(" ");
+
+          const textureName = material.name + "_map_Kd";
+
           texturePromises.push(
-            Texture.fetch([url]).then((texture) => {
+            Texture.fetch([url], textureName).then((texture) => {
               material.texture = texture.id;
               textures[texture.id] = {
                 texture,
-                name: material.name + "_map_kD",
+                name: textureName,
               };
             })
           );
@@ -253,12 +266,14 @@ async function loadMtl(
             "/" +
             parts.slice(1).join(" ");
 
+          const textureName = material.name + "_norm";
+
           texturePromises.push(
-            Texture.fetch([url]).then((normalMap) => {
+            Texture.fetch([url], textureName).then((normalMap) => {
               material.normalMap = normalMap.id;
               textures[normalMap.id] = {
                 texture: normalMap,
-                name: material.name + "_norm",
+                name: textureName,
               };
             })
           );

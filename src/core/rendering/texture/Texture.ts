@@ -15,10 +15,10 @@ class Texture extends Component {
 
   public texture!: GPUTexture;
 
+  public readonly label?: string;
   private readonly sources: GPUCopyExternalImageSource[];
   private readonly width: number;
   private readonly height: number;
-  private readonly label?: string;
 
   constructor(
     sources: GPUCopyExternalImageSource[],

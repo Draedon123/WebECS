@@ -84,8 +84,10 @@ class ResourceManager {
     const mesh: MeshEntry =
       verticesOrMesh instanceof Array
         ? {
-            vertices: new VertexArray(verticesOrMesh),
-            indices: indices ? new IndexArray(indices) : undefined,
+            vertices: new VertexArray(verticesOrMesh, key + " Vertex Array"),
+            indices: indices
+              ? new IndexArray(indices, key + " Index Array")
+              : undefined,
           }
         : verticesOrMesh;
 
