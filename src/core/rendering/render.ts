@@ -9,6 +9,7 @@ import { BufferWriter } from "../gpu/BufferWriter";
 import { calculateModelMatrix } from "../transforms/calculateModelMatrix";
 import { calculateNormalMatrix } from "../transforms/calculateNormalMatrix";
 import { NormalMapReference } from "./texture/NormalMapReference";
+import { TextureManager } from "../TextureManager";
 
 function render(
   resourceManager: ResourceManager,
@@ -54,7 +55,7 @@ function renderObject(
   );
 
   const textureKey =
-    textureReference?.textureKey ?? ResourceManager.DEFAULT_TEXTURE_KEY;
+    textureReference?.textureKey ?? TextureManager.DEFAULT_TEXTURE_KEY;
   const texture = resourceManager.getTexture(textureKey);
 
   if (texture === null) {
@@ -69,7 +70,7 @@ function renderObject(
 
   const normalMapKey = normalMapReference?.textureKey;
   const normalMap = resourceManager.getTexture(
-    normalMapKey ?? ResourceManager.DEFAULT_TEXTURE_KEY
+    normalMapKey ?? TextureManager.DEFAULT_TEXTURE_KEY
   );
 
   const parent =
@@ -81,7 +82,9 @@ function renderObject(
     entityManager.getComponent<Rotation>(entity, "Rotation") ?? undefined;
   const scale = entityManager.getComponent<Scale>(entity, "Scale") ?? undefined;
 
-  const bufferWriter = new BufferWriter(resourceManager.transformByteLength);
+  const bufferWriter = new BufferWriter(
+    resourceManager.transformBindings.transformByteLength
+  );
   const modelMatrix = calculateModelMatrix({ position, rotation, scale });
 
   if (parent !== null) {
@@ -110,18 +113,24 @@ function renderObject(
 
   const bufferOffset =
     objectIndex *
-    (resourceManager.transformByteLength + resourceManager.transformsPadding);
+    (resourceManager.transformBindings.transformByteLength +
+      resourceManager.transformBindings.transformsPadding);
   device.queue.writeBuffer(
-    resourceManager.transformsBuffer,
+    resourceManager.transformBindings.transformsBuffer,
     bufferOffset,
     bufferWriter.buffer
   );
 
   renderPass.setVertexBuffer(0, mesh.vertices.vertexBuffer);
-  renderPass.setBindGroup(1, resourceManager.transformsBindGroup, [
-    objectIndex *
-      (resourceManager.transformByteLength + resourceManager.transformsPadding),
-  ]);
+  renderPass.setBindGroup(
+    1,
+    resourceManager.transformBindings.transformsBindGroup,
+    [
+      objectIndex *
+        (resourceManager.transformBindings.transformByteLength +
+          resourceManager.transformBindings.transformsPadding),
+    ]
+  );
   renderPass.setBindGroup(
     2,
     resourceManager.getTextureBindGroup(texture, normalMap ?? undefined)
