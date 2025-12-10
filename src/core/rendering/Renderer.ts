@@ -161,8 +161,15 @@ class Renderer {
           buffer: { type: "read-only-storage" },
           visibility: GPUShaderStage.FRAGMENT,
         },
+        {
+          binding: 5,
+          buffer: { type: "read-only-storage" },
+          visibility: GPUShaderStage.FRAGMENT,
+        },
       ],
     });
+
+    await this.initialiseBuiltinMaterials();
 
     this.bindGroup0 = this.device.createBindGroup({
       label: "Renderer Bind Group 0",
@@ -188,6 +195,14 @@ class Renderer {
           binding: 4,
           resource: { buffer: this.pointLightsBuffer },
         },
+        {
+          binding: 5,
+          resource: {
+            buffer:
+              this.resourceManager.materials.materials.get("PhongMaterial")!
+                .materialsBuffer,
+          },
+        },
       ],
     });
 
@@ -195,8 +210,6 @@ class Renderer {
       this.device,
       this.canvasFormat
     );
-
-    await this.initialiseBuiltinMaterials();
   }
 
   private async initialiseBuiltinMaterials(): Promise<void> {

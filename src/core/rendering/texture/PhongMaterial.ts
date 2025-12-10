@@ -4,8 +4,11 @@ import { Texture } from "./Texture";
 import type { BufferWriter } from "src/core/gpu/BufferWriter";
 
 type PhongMaterialOptions = {
+  /** 0-255 */
   ambient: Vector3;
+  /** 0-255 */
   diffuse: Vector3;
+  /** 0-255 */
   specular: Vector3;
   ambientMap: Texture;
   diffuseMap: Texture;
@@ -16,7 +19,7 @@ type PhongMaterialOptions = {
 
 class PhongMaterial extends Component {
   public static readonly tag: string = "PhongMaterial";
-  public static readonly BYTE_LENGTH: number = 12 * 4;
+  public static readonly BYTE_LENGTH: number = 16 * 4;
   public static readonly DEFAULT: PhongMaterial = new PhongMaterial();
 
   public readonly byteLength: number;
@@ -47,12 +50,16 @@ class PhongMaterial extends Component {
   }
 
   public writeToBuffer(bufferWriter: BufferWriter): void {
-    bufferWriter.writeVec3f(this.ambient);
+    bufferWriter.writeVec3f(Vector3.scale(this.ambient, 1 / 255));
     bufferWriter.pad(4);
-    bufferWriter.writeVec3f(this.diffuse);
+    bufferWriter.writeVec3f(Vector3.scale(this.diffuse, 1 / 255));
     bufferWriter.pad(4);
-    bufferWriter.writeVec3f(this.specular);
+    bufferWriter.writeVec3f(Vector3.scale(this.specular, 1 / 255));
     bufferWriter.writeFloat32(this.shininess);
+    bufferWriter.writeBool(this.hasNormalMap);
+    bufferWriter.writeBool(this.hasAmbientMap);
+    bufferWriter.writeBool(this.hasDiffuseMap);
+    bufferWriter.writeBool(this.hasSpecularMap);
   }
 
   public get ambientMap(): Texture {

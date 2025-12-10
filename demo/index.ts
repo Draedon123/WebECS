@@ -40,6 +40,7 @@ async function main(): Promise<void> {
     "ISS",
     "obj"
   );
+
   const iss = renderer.resourceManager.spawnModel("ISS");
   const issRotation = new Rotation();
 

@@ -89,16 +89,12 @@ function renderObject(
 
   const normalMatrix = calculateNormalMatrix(modelMatrix);
 
+  resourceManager.materials.materials.get("PhongMaterial")!.updateBuffer();
   bufferWriter.writeMat4x4f(modelMatrix);
   bufferWriter.writeMat3x3f(normalMatrix);
   bufferWriter.writeUint32(
     resourceManager.materials.getMaterialIndex(material)
   );
-  // TODO: FIX
-  bufferWriter.writeUint32(material.hasNormalMap ? 1 : 0);
-  bufferWriter.writeUint32(material.hasAmbientMap ? 1 : 0);
-  bufferWriter.writeUint32(material.hasDiffuseMap ? 1 : 0);
-  bufferWriter.writeUint32(material.hasSpecularMap ? 1 : 0);
 
   const bufferOffset =
     objectIndex *

@@ -26,6 +26,10 @@ class BufferWriter {
     this.offset += 4;
   }
 
+  public writeBool(bool: boolean): void {
+    this.writeUint32(bool ? 1 : 0);
+  }
+
   public writeFloat32(float32: number): void {
     this.dataview.setFloat32(this.offset, float32, this.littleEndian);
     this.offset += 4;

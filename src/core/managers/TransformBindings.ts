@@ -8,7 +8,7 @@ class TransformBindings {
   public readonly transformsPadding: number;
 
   constructor(renderer: Renderer, device: GPUDevice, maxObjects: number) {
-    this.transformByteLength = (16 + 12 + 4) * 4;
+    this.transformByteLength = (16 + 12) * 4;
     const actualByteLength = roundUp(
       this.transformByteLength,
       device.limits.minUniformBufferOffsetAlignment

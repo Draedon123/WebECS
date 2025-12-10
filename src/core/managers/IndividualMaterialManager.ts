@@ -47,7 +47,7 @@ class IndividualMaterialManager<T extends Material> {
     this.materialsBuffer = device.createBuffer({
       label: "Materials Buffer",
       size: this.bufferByteLength,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
     });
 
     const renderPipelineLayout = device.createPipelineLayout({
@@ -137,7 +137,9 @@ class IndividualMaterialManager<T extends Material> {
   }
 
   public updateBuffer(): void {
-    const bufferWriter = new BufferWriter(this.bufferByteLength);
+    const bufferWriter = new BufferWriter(
+      this.materials.size * this.materialByteLength
+    );
 
     for (const material of this.materials) {
       material.writeToBuffer(bufferWriter);
