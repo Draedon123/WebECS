@@ -232,15 +232,7 @@ async function loadMtl(
           const g = parseFloat(parts[2]) * 255;
           const b = parseFloat(parts[3]) * 255;
 
-          const textureName = material.name + "_Kd";
-          const texture = Texture.colour(r, g, b, 255, textureName);
-
-          // TODO: fix
-          material.diffuseMap = texture;
-          textures[texture.id] = {
-            texture,
-            name: textureName,
-          };
+          material.diffuse = new Vector3(r, g, b);
 
           break;
         }

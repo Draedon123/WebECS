@@ -23,10 +23,10 @@ class PhongMaterial extends Component {
   public ambient: Vector3;
   public diffuse: Vector3;
   public specular: Vector3;
-  public ambientMap: Texture;
-  public diffuseMap: Texture;
-  public specularMap: Texture;
-  public normalMap: Texture;
+  private _ambientMap?: Texture;
+  private _diffuseMap?: Texture;
+  private _specularMap?: Texture;
+  private _normalMap?: Texture;
   public shininess: number;
 
   constructor(options: Partial<PhongMaterialOptions> = {}) {
@@ -38,10 +38,10 @@ class PhongMaterial extends Component {
     this.diffuse = options.diffuse ?? new Vector3(255, 255, 255);
     this.specular = options.specular ?? new Vector3(255, 255, 255);
 
-    this.ambientMap = options.ambientMap ?? Texture.colour(255, 255, 255);
-    this.diffuseMap = options.diffuseMap ?? Texture.colour(255, 255, 255);
-    this.specularMap = options.specularMap ?? Texture.colour(255, 255, 255);
-    this.normalMap = options.normalMap ?? Texture.colour(255, 255, 255);
+    this._ambientMap = options.ambientMap;
+    this._diffuseMap = options.diffuseMap;
+    this._specularMap = options.specularMap;
+    this._normalMap = options.normalMap;
 
     this.shininess = options.shininess ?? 32;
   }
@@ -53,6 +53,54 @@ class PhongMaterial extends Component {
     bufferWriter.pad(4);
     bufferWriter.writeVec3f(this.specular);
     bufferWriter.writeFloat32(this.shininess);
+  }
+
+  public get ambientMap(): Texture {
+    return this._ambientMap ?? Texture.WHITE;
+  }
+
+  public set ambientMap(texture: Texture | null) {
+    this._ambientMap = texture ?? undefined;
+  }
+
+  public get diffuseMap(): Texture {
+    return this._diffuseMap ?? Texture.WHITE;
+  }
+
+  public set diffuseMap(texture: Texture | null) {
+    this._diffuseMap = texture ?? undefined;
+  }
+
+  public get specularMap(): Texture {
+    return this._specularMap ?? Texture.WHITE;
+  }
+
+  public set specularMap(texture: Texture | null) {
+    this._specularMap = texture ?? undefined;
+  }
+
+  public get normalMap(): Texture {
+    return this._normalMap ?? Texture.WHITE;
+  }
+
+  public set normalMap(texture: Texture | null) {
+    this._normalMap = texture ?? undefined;
+  }
+
+  public get hasAmbientMap(): boolean {
+    return this._ambientMap !== undefined;
+  }
+
+  public get hasDiffuseMap(): boolean {
+    return this._diffuseMap !== undefined;
+  }
+
+  public get hasSpecularMap(): boolean {
+    return this._specularMap !== undefined;
+  }
+
+  public get hasNormalMap(): boolean {
+    return this._normalMap !== undefined;
   }
 }
 

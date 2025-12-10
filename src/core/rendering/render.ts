@@ -95,10 +95,10 @@ function renderObject(
     resourceManager.materials.getMaterialIndex(material)
   );
   // TODO: FIX
-  bufferWriter.writeUint32(material.normalMap.height > 1 ? 1 : 0);
-  bufferWriter.writeUint32(material.ambientMap.height > 1 ? 1 : 0);
-  bufferWriter.writeUint32(material.diffuseMap.height > 1 ? 1 : 0);
-  bufferWriter.writeUint32(material.specularMap.height > 1 ? 1 : 0);
+  bufferWriter.writeUint32(material.hasNormalMap ? 1 : 0);
+  bufferWriter.writeUint32(material.hasAmbientMap ? 1 : 0);
+  bufferWriter.writeUint32(material.hasDiffuseMap ? 1 : 0);
+  bufferWriter.writeUint32(material.hasSpecularMap ? 1 : 0);
 
   const bufferOffset =
     objectIndex *

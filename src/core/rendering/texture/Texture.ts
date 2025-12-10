@@ -12,6 +12,7 @@ type EquirectangularSettings = {
 
 class Texture extends Component {
   public static readonly tag: string = "Texture";
+  public static readonly WHITE: Texture = Texture.colour(255, 255, 255);
 
   public texture!: GPUTexture;
 
