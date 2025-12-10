@@ -1,5 +1,5 @@
-import { roundUp } from "./maths";
-import type { Renderer } from "./rendering";
+import { roundUp } from "../maths";
+import type { Renderer } from "../rendering";
 
 class TransformBindings {
   public readonly transformsBindGroup: GPUBindGroup;

@@ -1,12 +1,12 @@
 import {
   AmbientLight,
-  createSphereMesh,
+  // createSphereMesh,
   DirectionalLight,
   EntityManager,
   Light,
   lookAt,
   Loop,
-  MeshReference,
+  // MeshReference,
   PerspectiveCamera,
   PointLight,
   Position,
@@ -67,71 +67,71 @@ async function main(): Promise<void> {
     "Milky Way Skybox"
   );
 
-  renderer.resourceManager.addTexture("MilkyWaySkybox", skyboxTexture);
+  renderer.resourceManager.textures.add("MilkyWaySkybox", skyboxTexture);
   entityManager.createEntity(
     new Skybox(),
     new TextureReference("MilkyWaySkybox")
   );
 
-  const planetTextures = [
-    "Alpine",
-    "Gaseous1",
-    "Gaseous2",
-    "Gaseous3",
-    "Gaseous4",
-    "Icy",
-    "Martian",
-    "Savannah",
-    "Swamp",
-    "Terrestrial1",
-    "Terrestrial2",
-    "Terrestrial3",
-    "Terrestrial4",
-    "Tropical",
-    "Venusian",
-    "Volcanic",
-  ];
+  // const planetTextures = [
+  //   "Alpine",
+  //   "Gaseous1",
+  //   "Gaseous2",
+  //   "Gaseous3",
+  //   "Gaseous4",
+  //   "Icy",
+  //   "Martian",
+  //   "Savannah",
+  //   "Swamp",
+  //   "Terrestrial1",
+  //   "Terrestrial2",
+  //   "Terrestrial3",
+  //   "Terrestrial4",
+  //   "Tropical",
+  //   "Venusian",
+  //   "Volcanic",
+  // ];
 
-  await Promise.all(
-    planetTextures.map(async (planet) => {
-      const texture = await Texture.fetch(
-        [import.meta.env.BASE_URL + `/web-assets/planets/${planet}.png`],
-        planet
-      );
+  // await Promise.all(
+  //   planetTextures.map(async (planet) => {
+  //     const texture = await Texture.fetch(
+  //       [import.meta.env.BASE_URL + `/web-assets/planets/${planet}.png`],
+  //       planet
+  //     );
 
-      renderer.resourceManager.addTexture(planet, texture);
-    })
-  );
+  //     renderer.resourceManager.addTexture(planet, texture);
+  //   })
+  // );
 
-  const sphereMesh = createSphereMesh(7, 1);
-  renderer.resourceManager.addMesh(
-    "Sphere",
-    sphereMesh.vertices,
-    sphereMesh.indices
-  );
+  // const sphereMesh = createSphereMesh(7, 1);
+  // renderer.resourceManager.addMesh(
+  //   "Sphere",
+  //   sphereMesh.vertices,
+  //   sphereMesh.indices
+  // );
 
-  const PLANET_COUNT = 80;
+  // const PLANET_COUNT = 80;
 
-  for (let i = 0; i < PLANET_COUNT; i++) {
-    const theta = random(0, Math.PI * 2);
-    const radius = random(30, 80);
+  // for (let i = 0; i < PLANET_COUNT; i++) {
+  //   const theta = random(0, Math.PI * 2);
+  //   const radius = random(30, 80);
 
-    const x = radius * Math.cos(theta);
-    const z = radius * Math.sin(theta);
+  //   const x = radius * Math.cos(theta);
+  //   const z = radius * Math.sin(theta);
 
-    entityManager.createEntity(
-      new MeshReference("Sphere"),
-      new TextureReference(
-        planetTextures[Math.floor(random(0, planetTextures.length))]
-      ),
-      new Position(x, random(-30, 15), z),
-      new Rotation(random(0, 360), random(0, 360), random(0, 360))
-    );
-  }
+  //   entityManager.createEntity(
+  //     new MeshReference("Sphere"),
+  //     new TextureReference(
+  //       planetTextures[Math.floor(random(0, planetTextures.length))]
+  //     ),
+  //     new Position(x, random(-30, 15), z),
+  //     new Rotation(random(0, 360), random(0, 360), random(0, 360))
+  //   );
+  // }
 
-  function random(min: number, max: number): number {
-    return (max - min) * Math.random() + min;
-  }
+  // function random(min: number, max: number): number {
+  //   return (max - min) * Math.random() + min;
+  // }
 
   const loop = new Loop();
 

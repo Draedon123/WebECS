@@ -1,6 +1,6 @@
 import { Shader } from "./Shader";
 import { render } from "./render";
-import { ResourceManager } from "../ResourceManager";
+import { ResourceManager } from "../managers/ResourceManager";
 import { writeCameraDataToBuffer } from "../cameras/writeCameraDataToBuffer";
 import { EntityManager, type Entity } from "src/ecs";
 import { writeAmbientLightToBuffer } from "./scene/writeAmbientLightToBuffer";
@@ -12,6 +12,7 @@ import { writeDirectionalLightToBuffer } from "./scene/writeDirectionalLightToBu
 import { AmbientLight, Light } from "./scene";
 import { DirectionalLight } from "./scene/DirectionalLight";
 import { getCameraData } from "../cameras/getCameraData";
+import { PhongMaterial } from "./texture";
 
 type RendererSettings = {
   clearColour: GPUColor;
@@ -20,21 +21,20 @@ type RendererSettings = {
 
 class Renderer {
   public readonly canvas: HTMLCanvasElement;
+  public readonly canvasFormat: GPUTextureFormat;
 
   public settings: RendererSettings;
 
   private readonly device: GPUDevice;
   private readonly ctx: GPUCanvasContext;
-  private readonly canvasFormat: GPUTextureFormat;
 
-  private bindGroup0!: GPUBindGroup;
-  private renderPipeline!: GPURenderPipeline;
+  public bindGroup0Layout!: GPUBindGroupLayout;
+  public bindGroup0!: GPUBindGroup;
   private depthTexture!: GPUTexture;
   private skyboxRenderer!: SkyboxRenderer;
 
   public readonly resourceManager: ResourceManager;
   public readonly perObjectBindGroupLayout: GPUBindGroupLayout;
-  public readonly texureBindGroupLayout: GPUBindGroupLayout;
   private readonly cameraBuffer: GPUBuffer;
   private readonly ambientLightBuffer: GPUBuffer;
   private readonly directionalLightBuffer: GPUBuffer;
@@ -95,21 +95,6 @@ class Renderer {
         },
       ],
     });
-    this.texureBindGroupLayout = this.device.createBindGroupLayout({
-      label: "Renderer Normal Map Bind Group Layout",
-      entries: [
-        {
-          binding: 0,
-          texture: {},
-          visibility: GPUShaderStage.FRAGMENT,
-        },
-        {
-          binding: 1,
-          texture: {},
-          visibility: GPUShaderStage.FRAGMENT,
-        },
-      ],
-    });
     this.resourceManager = new ResourceManager(this, device, 512);
 
     this.depthTexture = this.createDepthTexture();
@@ -148,13 +133,7 @@ class Renderer {
       format: this.canvasFormat,
     });
 
-    const shader = await Shader.fetch(
-      import.meta.env.BASE_URL + "/blinnPhong.wgsl",
-      "Blinn Phong Shader"
-    );
-    shader.initialise(this.device);
-
-    const bindGroup0Layout = this.device.createBindGroupLayout({
+    this.bindGroup0Layout = this.device.createBindGroupLayout({
       label: "Renderer Bind Group Layout 0",
       entries: [
         {
@@ -187,7 +166,7 @@ class Renderer {
 
     this.bindGroup0 = this.device.createBindGroup({
       label: "Renderer Bind Group 0",
-      layout: bindGroup0Layout,
+      layout: this.bindGroup0Layout,
       entries: [
         {
           binding: 0,
@@ -212,75 +191,87 @@ class Renderer {
       ],
     });
 
-    const renderPipelineLayout = this.device.createPipelineLayout({
-      label: "Renderer Render Pipeline Layout",
-      bindGroupLayouts: [
-        bindGroup0Layout,
-        this.perObjectBindGroupLayout,
-        this.texureBindGroupLayout,
-      ],
-    });
-
-    this.renderPipeline = this.device.createRenderPipeline({
-      label: "Renderer Render Pipeline",
-      layout: renderPipelineLayout,
-      vertex: {
-        module: shader.shader,
-        entryPoint: "vertexMain",
-        buffers: [
-          {
-            arrayStride: (3 + 2 + 3 + 4) * 4,
-            attributes: [
-              // position
-              {
-                shaderLocation: 0,
-                format: "float32x3",
-                offset: 0,
-              },
-              // uv
-              {
-                shaderLocation: 1,
-                format: "float32x2",
-                offset: 3 * 4,
-              },
-              // normal
-              {
-                shaderLocation: 2,
-                format: "float32x3",
-                offset: (3 + 2) * 4,
-              },
-              // tangent
-              {
-                shaderLocation: 3,
-                format: "float32x4",
-                offset: (3 + 2 + 3) * 4,
-              },
-            ],
-          },
-        ],
-      },
-      fragment: {
-        module: shader.shader,
-        entryPoint: "fragmentMain",
-        targets: [
-          {
-            format: this.canvasFormat,
-          },
-        ],
-      },
-      primitive: {
-        cullMode: "back",
-      },
-      depthStencil: {
-        format: "depth24plus",
-        depthCompare: "less",
-        depthWriteEnabled: true,
-      },
-    });
-
     this.skyboxRenderer = await SkyboxRenderer.create(
       this.device,
       this.canvasFormat
+    );
+
+    await this.initialiseBuiltinMaterials();
+  }
+
+  private async initialiseBuiltinMaterials(): Promise<void> {
+    await this.initialiseBlinnPhong();
+  }
+
+  private async initialiseBlinnPhong(): Promise<void> {
+    const shader = await Shader.fetch(
+      import.meta.env.BASE_URL + "/blinnPhong.wgsl",
+      "Blinn Phong Shader"
+    );
+
+    shader.initialise(this.device);
+
+    const bindGroupLayout = this.device.createBindGroupLayout({
+      label: "Blinn Phong Bind Group Layout",
+      entries: [
+        {
+          binding: 0,
+          texture: {},
+          visibility: GPUShaderStage.FRAGMENT,
+        },
+        {
+          binding: 1,
+          texture: {},
+          visibility: GPUShaderStage.FRAGMENT,
+        },
+        {
+          binding: 2,
+          texture: {},
+          visibility: GPUShaderStage.FRAGMENT,
+        },
+        {
+          binding: 3,
+          texture: {},
+          visibility: GPUShaderStage.FRAGMENT,
+        },
+      ],
+    });
+
+    this.resourceManager.materials.registerMaterialType<PhongMaterial>(
+      PhongMaterial.tag,
+      bindGroupLayout,
+      shader,
+      (material, device) => {
+        material.normalMap.initialise(device);
+        material.ambientMap.initialise(device);
+        material.diffuseMap.initialise(device);
+        material.specularMap.initialise(device);
+
+        return device.createBindGroup({
+          label: `Blinn Phon Bind Group ${material.id}`,
+          layout: bindGroupLayout,
+          entries: [
+            {
+              binding: 0,
+              resource: material.normalMap.texture.createView(),
+            },
+            {
+              binding: 1,
+              resource: material.ambientMap.texture.createView(),
+            },
+            {
+              binding: 2,
+              resource: material.diffuseMap.texture.createView(),
+            },
+            {
+              binding: 3,
+              resource: material.specularMap.texture.createView(),
+            },
+          ],
+        });
+      },
+      ({ normalMap, ambientMap, diffuseMap, specularMap }) =>
+        `${normalMap.id},${ambientMap.id},${diffuseMap.id},${specularMap.id}`
     );
   }
 
@@ -343,10 +334,7 @@ class Renderer {
       getCameraData(camera).perspectiveViewMatrix
     );
 
-    renderPass.setPipeline(this.renderPipeline);
-    renderPass.setBindGroup(0, this.bindGroup0);
-
-    render(this.resourceManager, this.device, renderPass);
+    render(this, this.resourceManager, this.device, renderPass);
 
     renderPass.end();
     this.device.queue.submit([encoder.finish(renderPass)]);

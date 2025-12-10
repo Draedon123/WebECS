@@ -1,17 +1,15 @@
 import { EntityManager, type Entity } from "src/ecs";
-import { IndexArray, MeshReference, VertexArray, type Vertex } from "./meshes";
-import {
-  NormalMapReference,
-  Texture,
-  TextureReference,
-  type Renderer,
-} from "./rendering";
+import { IndexArray, MeshReference, VertexArray, type Vertex } from "../meshes";
+import { type Renderer } from "../rendering";
 import { Children } from "src/ecs/Children";
 import { Parent } from "src/ecs/Parent";
-import { loadObj } from "./meshes/loaders/obj";
-import { initialiseMesh } from "./meshes/initialiseMesh";
+import { loadObj } from "../meshes/loaders/obj";
+import { initialiseMesh } from "../meshes/initialiseMesh";
 import { TextureManager } from "./TextureManager";
 import { TransformBindings } from "./TransformBindings";
+import { MaterialsManager } from "./MaterialsManager";
+import type { Material } from "./IndividualMaterialManager";
+import { MaterialReference } from "../rendering/texture/MaterialReference";
 
 type MeshEntry = {
   vertices: VertexArray;
@@ -20,14 +18,14 @@ type MeshEntry = {
 
 type ModelEntry = {
   meshReference: string;
-  textureReference?: string;
-  normalMapReference?: string;
+  material: Material;
 }[];
 
 type ModelType = "obj";
 
 class ResourceManager {
-  private readonly textureManager: TextureManager;
+  public readonly textures: TextureManager;
+  public readonly materials: MaterialsManager;
   private readonly meshes: Map<string, MeshEntry>;
   private readonly models: Map<string, ModelEntry>;
 
@@ -41,31 +39,14 @@ class ResourceManager {
       device,
       maxObjects
     );
-    this.textureManager = new TextureManager(renderer, device);
+
+    this.textures = new TextureManager(device);
+    this.materials = new MaterialsManager(renderer, device);
     this.meshes = new Map();
     this.models = new Map();
 
     // this.renderer = renderer;
     this.device = device;
-  }
-
-  public addTexture(key: string, texture: Texture): void {
-    this.textureManager.addTexture(key, texture);
-  }
-
-  public getTexture(key: string): Texture | null {
-    return this.textureManager.getTexture(key);
-  }
-
-  public deleteTexture(key: string): boolean {
-    return this.textureManager.deleteTexture(key);
-  }
-
-  public getTextureBindGroup(
-    texture?: Texture,
-    normalMap?: Texture
-  ): GPUBindGroup {
-    return this.textureManager.getTextureBindGroup(texture, normalMap);
   }
 
   public addMesh(key: string, mesh: MeshEntry): void;
@@ -125,7 +106,7 @@ class ResourceManager {
         const model = await loadObj(modelPath);
 
         for (const texture of Object.values(model.textures)) {
-          this.addTexture(texture.name, texture.texture);
+          this.textures.add(texture.name, texture.texture);
         }
 
         for (let i = 0; i < model.meshes.length; i++) {
@@ -136,17 +117,9 @@ class ResourceManager {
         this.models.set(
           modelKey,
           Object.values(model.meshes).map((mesh) => {
-            const texture = model.materials[mesh.materialName].texture;
-            const normalMap = model.materials[mesh.materialName].normalMap;
-
             return {
               meshReference: mesh.name,
-              textureReference: texture
-                ? model.textures[texture].name
-                : undefined,
-              normalMapReference: normalMap
-                ? model.textures[normalMap].name
-                : undefined,
+              material: model.materials[mesh.materialName],
             };
           })
         );
@@ -187,15 +160,16 @@ class ResourceManager {
         this.deleteMesh(mesh.meshReference);
       }
 
-      if (deleteOptions?.textures) {
-        if (mesh.textureReference) {
-          this.deleteTexture(mesh.textureReference);
-        }
+      // TODO:
+      // if (deleteOptions?.textures) {
+      //   if (mesh.textureReference) {
+      //     this.textures.delete(mesh.textureReference);
+      //   }
 
-        if (mesh.normalMapReference) {
-          this.deleteTexture(mesh.normalMapReference);
-        }
-      }
+      //   if (mesh.normalMapReference) {
+      //     this.textures.delete(mesh.normalMapReference);
+      //   }
+      // }
     }
 
     return true;
@@ -212,25 +186,15 @@ class ResourceManager {
     const children = new Children();
     const modelEntity = entityManager.createEntity(children);
 
-    for (const mesh of model) {
-      const meshReference = new MeshReference(mesh.meshReference);
+    for (const object of model) {
+      const meshReference = new MeshReference(object.meshReference);
       const parent = new Parent(modelEntity);
 
-      const child = entityManager.createEntity(meshReference, parent);
-
-      if (mesh.textureReference) {
-        entityManager.addComponent(
-          child,
-          new TextureReference(mesh.textureReference)
-        );
-      }
-
-      if (mesh.normalMapReference) {
-        entityManager.addComponent(
-          child,
-          new NormalMapReference(mesh.normalMapReference)
-        );
-      }
+      const child = entityManager.createEntity(
+        meshReference,
+        parent,
+        new MaterialReference(object.material)
+      );
 
       children.children.push(child);
     }

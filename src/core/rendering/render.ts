@@ -1,17 +1,18 @@
 import { EntityManager, type Entity } from "src/ecs";
 import { Position, Rotation, Scale } from "../transforms";
-import { ResourceManager } from "../ResourceManager";
+import { ResourceManager } from "../managers/ResourceManager";
 import { MeshReference } from "../meshes/MeshReference";
-import { TextureReference } from "./texture/TextureReference";
 import { Parent } from "src/ecs/Parent";
 import { Matrix4 } from "../maths";
 import { BufferWriter } from "../gpu/BufferWriter";
 import { calculateModelMatrix } from "../transforms/calculateModelMatrix";
 import { calculateNormalMatrix } from "../transforms/calculateNormalMatrix";
-import { NormalMapReference } from "./texture/NormalMapReference";
-import { TextureManager } from "../TextureManager";
+import type { MaterialReference } from "./texture/MaterialReference";
+import { PhongMaterial } from "./texture";
+import type { Renderer } from "./Renderer";
 
 function render(
+  renderer: Renderer,
   resourceManager: ResourceManager,
   device: GPUDevice,
   renderPass: GPURenderPassEncoder
@@ -25,13 +26,14 @@ function render(
   for (let i = 0; i < renderables.length; i++) {
     const entity = renderables[i];
 
-    renderObject(entity, i, resourceManager, device, renderPass);
+    renderObject(entity, i, renderer, resourceManager, device, renderPass);
   }
 }
 
 function renderObject(
   entity: Entity,
   objectIndex: number,
+  renderer: Renderer,
   resourceManager: ResourceManager,
   device: GPUDevice,
   renderPass: GPURenderPassEncoder
@@ -49,29 +51,12 @@ function renderObject(
     return;
   }
 
-  const textureReference = entityManager.getComponent<TextureReference>(
+  const materialReference = entityManager.getComponent<MaterialReference>(
     entity,
-    "TextureReference"
+    "MaterialReference"
   );
 
-  const textureKey =
-    textureReference?.textureKey ?? TextureManager.DEFAULT_TEXTURE_KEY;
-  const texture = resourceManager.getTexture(textureKey);
-
-  if (texture === null) {
-    console.error(`No valid texture found with key ${textureKey}`);
-    return;
-  }
-
-  const normalMapReference = entityManager.getComponent<NormalMapReference>(
-    entity,
-    "NormalMapReference"
-  );
-
-  const normalMapKey = normalMapReference?.textureKey;
-  const normalMap = resourceManager.getTexture(
-    normalMapKey ?? TextureManager.DEFAULT_TEXTURE_KEY
-  );
+  const material = materialReference?.activeMaterial ?? PhongMaterial.DEFAULT;
 
   const parent =
     entityManager.getComponent<Parent>(entity, "Parent")?.parent ?? null;
@@ -106,10 +91,14 @@ function renderObject(
 
   bufferWriter.writeMat4x4f(modelMatrix);
   bufferWriter.writeMat3x3f(normalMatrix);
-  bufferWriter.pad(4);
   bufferWriter.writeUint32(
-    normalMapKey !== undefined && normalMap !== null ? 1 : 0
+    resourceManager.materials.getMaterialIndex(material)
   );
+  // TODO: FIX
+  bufferWriter.writeUint32(material.normalMap.height > 1 ? 1 : 0);
+  bufferWriter.writeUint32(material.ambientMap.height > 1 ? 1 : 0);
+  bufferWriter.writeUint32(material.diffuseMap.height > 1 ? 1 : 0);
+  bufferWriter.writeUint32(material.specularMap.height > 1 ? 1 : 0);
 
   const bufferOffset =
     objectIndex *
@@ -122,6 +111,8 @@ function renderObject(
   );
 
   renderPass.setVertexBuffer(0, mesh.vertices.vertexBuffer);
+  renderPass.setPipeline(resourceManager.materials.getRenderPipeline(material));
+  renderPass.setBindGroup(0, renderer.bindGroup0);
   renderPass.setBindGroup(
     1,
     resourceManager.transformBindings.transformsBindGroup,
@@ -131,10 +122,7 @@ function renderObject(
           resourceManager.transformBindings.transformsPadding),
     ]
   );
-  renderPass.setBindGroup(
-    2,
-    resourceManager.getTextureBindGroup(texture, normalMap ?? undefined)
-  );
+  renderPass.setBindGroup(2, resourceManager.materials.getBindGroup(material));
 
   if (mesh.indices !== undefined) {
     renderPass.setIndexBuffer(

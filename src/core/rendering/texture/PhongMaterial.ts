@@ -10,23 +10,29 @@ type PhongMaterialOptions = {
   ambientMap: Texture;
   diffuseMap: Texture;
   specularMap: Texture;
+  normalMap: Texture;
   shininess: number;
 };
 
 class PhongMaterial extends Component {
   public static readonly tag: string = "PhongMaterial";
   public static readonly BYTE_LENGTH: number = 12 * 4;
+  public static readonly DEFAULT: PhongMaterial = new PhongMaterial();
 
+  public readonly byteLength: number;
   public ambient: Vector3;
   public diffuse: Vector3;
   public specular: Vector3;
   public ambientMap: Texture;
   public diffuseMap: Texture;
   public specularMap: Texture;
+  public normalMap: Texture;
   public shininess: number;
 
   constructor(options: Partial<PhongMaterialOptions> = {}) {
     super(PhongMaterial.tag);
+
+    this.byteLength = PhongMaterial.BYTE_LENGTH;
 
     this.ambient = options.ambient ?? new Vector3(255, 255, 255);
     this.diffuse = options.diffuse ?? new Vector3(255, 255, 255);
@@ -35,6 +41,7 @@ class PhongMaterial extends Component {
     this.ambientMap = options.ambientMap ?? Texture.colour(255, 255, 255);
     this.diffuseMap = options.diffuseMap ?? Texture.colour(255, 255, 255);
     this.specularMap = options.specularMap ?? Texture.colour(255, 255, 255);
+    this.normalMap = options.normalMap ?? Texture.colour(255, 255, 255);
 
     this.shininess = options.shininess ?? 32;
   }

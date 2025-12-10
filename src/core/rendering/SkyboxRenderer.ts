@@ -3,7 +3,7 @@ import { Matrix4 } from "../maths";
 import { Shader } from "./Shader";
 import { Texture } from "./texture/Texture";
 import { TextureReference } from "./texture/TextureReference";
-import type { ResourceManager } from "../ResourceManager";
+import type { ResourceManager } from "../managers/ResourceManager";
 import { Skybox } from "./scene";
 
 class SkyboxRenderer {
@@ -116,7 +116,7 @@ class SkyboxRenderer {
         "TextureReference"
       ) as TextureReference;
 
-    const texture = resourceManager.getTexture(textureReference.textureKey);
+    const texture = resourceManager.textures.get(textureReference.textureKey);
 
     if (!texture) {
       console.error(`No texture with key ${textureReference.textureKey} found`);

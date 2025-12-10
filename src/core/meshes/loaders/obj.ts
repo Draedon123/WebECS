@@ -1,14 +1,16 @@
 import { Vector2, Vector3 } from "src/core/maths";
 import { VertexArray, type Vertex } from "../VertexArray";
 import { IndexArray } from "../IndexArray";
-import type { MeshEntry } from "src/core/ResourceManager";
-import { Texture } from "src/core/rendering";
+import type { MeshEntry } from "../../managers/ResourceManager";
+import {
+  PhongMaterial,
+  Texture,
+  type PhongMaterialOptions,
+} from "src/core/rendering";
 import { gunzipSync, strFromU8 } from "fflate";
 
-type Material = {
+type Material = PhongMaterialOptions & {
   name: string;
-  texture?: number;
-  normalMap?: number;
 };
 
 type Mesh = MeshEntry & {
@@ -23,7 +25,7 @@ type NamedTexture = {
 
 async function loadObj(filePath: string): Promise<{
   meshes: Mesh[];
-  materials: Record<string, Material>;
+  materials: Record<string, PhongMaterial>;
   textures: Record<number, NamedTexture>;
 }> {
   let fileContents: string;
@@ -185,9 +187,14 @@ async function loadObj(filePath: string): Promise<{
     meshes[meshes.length - 1].name + " Index Array"
   );
 
+  const phongMaterials: Record<string, PhongMaterial> = {};
+  for (const [name, material] of Object.entries(materials)) {
+    phongMaterials[name] = new PhongMaterial(material);
+  }
+
   return {
     meshes,
-    materials,
+    materials: phongMaterials,
     textures,
   };
 }
@@ -228,7 +235,8 @@ async function loadMtl(
           const textureName = material.name + "_Kd";
           const texture = Texture.colour(r, g, b, 255, textureName);
 
-          material.texture = texture.id;
+          // TODO: fix
+          material.diffuseMap = texture;
           textures[texture.id] = {
             texture,
             name: textureName,
@@ -248,7 +256,7 @@ async function loadMtl(
 
           texturePromises.push(
             Texture.fetch([url], textureName).then((texture) => {
-              material.texture = texture.id;
+              material.diffuseMap = texture;
               textures[texture.id] = {
                 texture,
                 name: textureName,
@@ -270,7 +278,7 @@ async function loadMtl(
 
           texturePromises.push(
             Texture.fetch([url], textureName).then((normalMap) => {
-              material.normalMap = normalMap.id;
+              material.normalMap = normalMap;
               textures[normalMap.id] = {
                 texture: normalMap,
                 name: textureName,

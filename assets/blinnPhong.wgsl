@@ -22,7 +22,11 @@ struct VertexOutput {
 struct ObjectData {
   modelMatrix: mat4x4f,
   normalMatrix: mat3x3f,
+  materialIndex: u32,
   hasNormalMap: u32,
+  hasAmbientMap: u32,
+  hasDiffuseMap: u32,
+  hasSpecularMap: u32,
 }
 
 struct AmbientLight {
@@ -54,16 +58,26 @@ struct Camera {
   position: vec3f,
 }
 
+struct PhongMaterial {
+  @align(16) ambient: vec3f,
+  @align(16) diffuse: vec3f,
+  specular: vec3f,
+  shininess: f32,
+}
+
 @group(0) @binding(0) var <uniform> camera: Camera; 
 @group(0) @binding(1) var textureSampler: sampler;
 @group(0) @binding(2) var <uniform> ambientLight: AmbientLight;
 @group(0) @binding(3) var <uniform> directionalLight: DirectionalLight;
 @group(0) @binding(4) var <storage, read> pointLights: PointLights;
+@group(0) @binding(5) var <storage, read> materials: array<PhongMaterial>;
 
 @group(1) @binding(0) var <uniform> objectData: ObjectData;
 
-@group(2) @binding(0) var texture: texture_2d<f32>;
-@group(2) @binding(1) var normalMap: texture_2d<f32>;
+@group(2) @binding(0) var normalMap: texture_2d<f32>;
+@group(2) @binding(1) var ambientMap: texture_2d<f32>;
+@group(2) @binding(2) var diffuseMap: texture_2d<f32>;
+@group(2) @binding(3) var specularMap: texture_2d<f32>;
 
 @vertex
 fn vertexMain(vertex: Vertex) -> VertexOutput {
@@ -96,7 +110,7 @@ fn fragmentMain(input: VertexOutput) -> @location(0) vec4f {
     input.hasNormalMap == 1,
   );
 
-  let textureColour: vec3f = textureSample(texture, textureSampler, input.uv).rgb;
+  let textureColour: vec3f = textureSample(diffuseMap, textureSampler, input.uv).rgb;
   let ambient: vec3f = ambientLight.strength * ambientLight.colour;
   var pointLightContribution: vec3f = vec3f(0.0);
 
