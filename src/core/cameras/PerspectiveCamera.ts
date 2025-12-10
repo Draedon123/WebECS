@@ -105,7 +105,7 @@ class PerspectiveCamera extends Component {
   }
 
   public set aspectRatio(aspectRatio: number) {
-    if (this._aspectRatio === this._aspectRatio) {
+    if (this._aspectRatio === aspectRatio) {
       return;
     }
 
