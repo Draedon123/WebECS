@@ -89,7 +89,6 @@ function renderObject(
 
   const normalMatrix = calculateNormalMatrix(modelMatrix);
 
-  resourceManager.materials.materials.get("PhongMaterial")!.updateBuffer();
   bufferWriter.writeMat4x4f(modelMatrix);
   bufferWriter.writeMat3x3f(normalMatrix);
   bufferWriter.writeUint32(

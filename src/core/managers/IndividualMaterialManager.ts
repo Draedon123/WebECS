@@ -123,6 +123,8 @@ class IndividualMaterialManager<T extends Material> {
 
     if (existingBindGroup !== undefined) {
       this.materials.add(material);
+      this.updateBuffer();
+
       return existingBindGroup;
     }
 
