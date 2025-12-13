@@ -1,6 +1,6 @@
 import { Vector3 } from "src/core/maths";
 import { Component } from "src/ecs";
-import { Texture } from "./Texture";
+import { Texture } from "../texture/Texture";
 import type { BufferWriter } from "src/core/gpu/BufferWriter";
 
 type PhongMaterialOptions = {

@@ -12,7 +12,7 @@ import { writeDirectionalLightToBuffer } from "./scene/writeDirectionalLightToBu
 import { AmbientLight, Light } from "./scene";
 import { DirectionalLight } from "./scene/DirectionalLight";
 import { getCameraData } from "../cameras/getCameraData";
-import { PhongMaterial } from "./texture";
+import { PhongMaterial } from "./materials";
 
 type RendererSettings = {
   clearColour: GPUColor;

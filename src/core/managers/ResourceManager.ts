@@ -9,7 +9,7 @@ import { TextureManager } from "./TextureManager";
 import { TransformBindings } from "./TransformBindings";
 import { MaterialsManager } from "./MaterialsManager";
 import type { Material } from "./IndividualMaterialManager";
-import { MaterialReference } from "../rendering/texture/MaterialReference";
+import { MaterialReference } from "../rendering/materials/MaterialReference";
 
 type MeshEntry = {
   vertices: VertexArray;

@@ -7,8 +7,8 @@ import { Matrix4 } from "../maths";
 import { BufferWriter } from "../gpu/BufferWriter";
 import { calculateModelMatrix } from "../transforms/calculateModelMatrix";
 import { calculateNormalMatrix } from "../transforms/calculateNormalMatrix";
-import type { MaterialReference } from "./texture/MaterialReference";
-import { PhongMaterial } from "./texture";
+import type { MaterialReference } from "./materials/MaterialReference";
+import { PhongMaterial } from "./materials";
 import type { Renderer } from "./Renderer";
 
 function render(
