@@ -122,11 +122,11 @@ class IndividualMaterialManager<T extends Material> {
     const existingBindGroup = this.bindGroups.get(hash);
 
     if (existingBindGroup !== undefined) {
-      this.materials.add(material);
-      this.updateBuffer();
-
       return existingBindGroup;
     }
+
+    this.materials.add(material);
+    this.updateBuffer();
 
     const bindGroup = this.createBindGroup(material, this.device);
 
