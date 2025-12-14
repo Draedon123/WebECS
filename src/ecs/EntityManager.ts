@@ -20,7 +20,7 @@ type MultiQuery = {
 class EntityManager {
   private static instance: EntityManager | null = null;
 
-  private readonly entityComponentMap: Map<Entity, Component[]>;
+  private readonly entityComponentMap: Map<Entity, Map<string, Component>>;
   private readonly componentEntityMap: Map<string, Entity[]>;
   private readonly components: Map<number, Component>;
 
@@ -92,7 +92,7 @@ class EntityManager {
     const entity =
       this.freeIds.length > 0 ? (this.freeIds.pop() as Entity) : this.nextId++;
 
-    this.entityComponentMap.set(entity, []);
+    this.entityComponentMap.set(entity, new Map());
 
     for (const component of components) {
       this.addComponent(entity, component);
@@ -111,8 +111,8 @@ class EntityManager {
 
     this.entityComponentMap.delete(entity);
 
-    for (const component of components) {
-      const map = this.componentEntityMap.get(component.tag) as Entity[];
+    for (const [tag, component] of components) {
+      const map = this.componentEntityMap.get(tag) as Entity[];
 
       map.splice(map.indexOf(entity), 1);
       this.components.delete(component.id);
@@ -127,7 +127,7 @@ class EntityManager {
       return;
     }
 
-    components.push(component);
+    components.set(component.tag, component);
 
     const newComponentMap = this.componentEntityMap.get(component.tag) ?? [];
     newComponentMap.push(entity);
@@ -147,8 +147,7 @@ class EntityManager {
       return null;
     }
 
-    const component =
-      components.find((component) => component.tag === componentTag) ?? null;
+    const component = components.get(componentTag) ?? null;
 
     return component as T | null;
   }
