@@ -112,16 +112,19 @@ fn fragmentMain(input: VertexOutput) -> @location(0) vec4f {
   );
 
   let textureColour: vec3f = material.diffuse * textureSample(diffuseMap, textureSampler, input.uv).rgb;
-  let ambient: vec3f = ambientLight.strength * ambientLight.colour;
+  let ambient: vec3f = ambientLight.strength * textureSample(ambientMap, textureSampler, input.uv).rgb;
+  let specularColour: vec3f = textureSample(specularMap, textureSampler, input.uv).rgb;
+  // https://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_reflection_model+
+  let shininess: f32 = material.shininess * 4.0;
   var pointLightContribution: vec3f = vec3f(0.0);
 
   for(var i: u32 = 0; i < pointLights.count; i++){
-    pointLightContribution += calculatePointLight(&pointLights.lights[i], normal, input.worldPosition.xyz, inverseTBN);
+    pointLightContribution += calculatePointLight(&pointLights.lights[i], normal, input.worldPosition.xyz, inverseTBN, shininess, specularColour);
   }
 
-  let directional = calculateDirectionalLight(normal, input.worldPosition.xyz, inverseTBN);
+  let directional = calculateDirectionalLight(normal, input.worldPosition.xyz, inverseTBN, shininess, specularColour);
 
-  return vec4f((ambient + pointLightContribution + directional) * textureColour, 1.0);
+  return vec4f(ambient + (pointLightContribution + directional) * textureColour, 1.0);
   // return select(vec4f(0.0), vec4f((transpose(inverseTBN) * normal + 1.0) / 2.0, 1.0), input.hasNormalMap == 1);
   // return vec4f((transpose(inverseTBN) * normal + 1.0) / 2.0, 1.0);
 }
