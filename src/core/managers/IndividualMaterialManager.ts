@@ -15,7 +15,7 @@ type MaterialBindGroupCreator<T extends Material> = (
 type MaterialHasher<T extends Material> = (material: T) => string;
 
 class IndividualMaterialManager<T extends Material> {
-  public static readonly MAX_MATERIALS: number = 64;
+  public static readonly MAX_MATERIALS: number = 128;
 
   public readonly renderPipeline: GPURenderPipeline;
   public readonly materialsBuffer: GPUBuffer;
