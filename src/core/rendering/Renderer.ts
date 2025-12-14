@@ -13,6 +13,7 @@ import { AmbientLight, Light } from "./scene";
 import { DirectionalLight } from "./scene/lights/DirectionalLight";
 import { getCameraData } from "../cameras/getCameraData";
 import { PhongMaterial } from "./materials";
+import { GPUTimer } from "../gpu/GPUTimer";
 
 type RendererSettings = {
   clearColour: GPUColor;
@@ -27,6 +28,7 @@ class Renderer {
 
   private readonly device: GPUDevice;
   private readonly ctx: GPUCanvasContext;
+  private readonly gpuTimer: GPUTimer;
 
   public bindGroup0Layout!: GPUBindGroupLayout;
   public bindGroup0!: GPUBindGroup;
@@ -55,6 +57,7 @@ class Renderer {
     this.canvas = canvas;
     this.device = device;
     this.ctx = ctx;
+    this.gpuTimer = new GPUTimer(device);
     this.canvasFormat = "rgba8unorm";
     this.settings = {
       clearColour: settings.clearColour ?? [0, 0, 0, 1],
@@ -292,7 +295,7 @@ class Renderer {
     const encoder = this.device.createCommandEncoder({
       label: "Renderer Command Encoder",
     });
-    const renderPass = encoder.beginRenderPass({
+    const renderPass = this.gpuTimer.beginRenderPass(encoder, {
       label: "Renderer Render Pass",
       colorAttachments: [
         {
@@ -351,6 +354,15 @@ class Renderer {
 
     renderPass.end();
     this.device.queue.submit([encoder.finish(renderPass)]);
+  }
+
+  /** ns */
+  public get frameTime(): number {
+    return this.gpuTimer.totalTime;
+  }
+
+  public get timingSupported(): boolean {
+    return this.gpuTimer.canTimestamp;
   }
 
   public static async create(

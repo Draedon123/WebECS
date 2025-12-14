@@ -136,6 +136,9 @@ async function main(): Promise<void> {
 
   const loop = new Loop();
 
+  const frameTimeElement = document.getElementById("frame-time") as HTMLElement;
+  const fpsElement = document.getElementById("fps") as HTMLElement;
+
   let issRotationX = 0;
   let issRotationY = 0;
   let issRotationZ = 0;
@@ -152,6 +155,27 @@ async function main(): Promise<void> {
     lookAt(camera, new Vector3(0, 0, 0));
 
     renderer.render(camera);
+
+    if (!renderer.timingSupported) {
+      frameTimeElement.textContent = "[Not supported by device/browser]";
+      fpsElement.textContent = "[Not supported by device/browser]";
+    } else {
+      const frameTime_ns = renderer.frameTime;
+      const frameTime_μs = frameTime_ns / 1e3;
+      const frameTime_ms = frameTime_μs / 1e3;
+      const frameTime_s = frameTime_ms / 1e3;
+
+      const frameTime =
+        frameTime_ms >= 1
+          ? frameTime_ms.toFixed(2) + "ms"
+          : frameTime_μs >= 1
+            ? frameTime_μs.toFixed(2) + "μs"
+            : frameTime_ns.toFixed(2) + "ns";
+      const fps = 1 / frameTime_s;
+
+      frameTimeElement.textContent = frameTime;
+      fpsElement.textContent = fps.toFixed(2);
+    }
   });
 
   const loadingElement = document.getElementById("loading") as HTMLElement;

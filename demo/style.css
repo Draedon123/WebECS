@@ -45,3 +45,26 @@ iframe {
   width: 50%;
   aspect-ratio: 1920 / 1080;
 }
+
+#info {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  background-color: #000;
+  color: #fff;
+  font-family: monospace;
+
+  padding: 3px 3ch 5px 3px;
+
+  width: max-content;
+  height: max-content;
+
+  z-index: 999;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 1;
+  }
+}
