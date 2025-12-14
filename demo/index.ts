@@ -27,9 +27,8 @@ async function main(): Promise<void> {
   const entityManager = EntityManager.getInstance();
 
   await renderer.initialise();
-  renderer.settings.clearColour = [0.1, 0.1, 0.1, 1];
 
-  const cameraComponent = new PerspectiveCamera({});
+  const cameraComponent = new PerspectiveCamera();
   const cameraPosition = new Position(0, 3, 10);
   const camera = entityManager.createEntity(
     cameraComponent,
@@ -43,23 +42,21 @@ async function main(): Promise<void> {
     "obj"
   );
 
-  const iss = renderer.resourceManager.spawnModel("ISS");
   const issRotation = new Rotation();
-
-  entityManager.addComponent(iss, new Position(0, 0, 0));
-  entityManager.addComponent(iss, new Scale(0.1));
-  entityManager.addComponent(iss, issRotation);
-
-  entityManager.createEntity(
-    new Light(new Vector3(255, 255, 255), 0.1),
-    new AmbientLight()
+  renderer.resourceManager.spawnModel(
+    "ISS",
+    new Position(0, 0, 0),
+    new Scale(0.1),
+    issRotation
   );
+
+  entityManager.createEntity(new Light({ intensity: 0.1 }), new AmbientLight());
   entityManager.createEntity(
-    new Light(new Vector3(255, 255, 255), 0.7),
+    new Light({ colour: new Vector3(255, 230, 230), intensity: 0.7 }),
     new DirectionalLight(new Vector3(0, 1, 0.2))
   );
   entityManager.createEntity(
-    new Light(new Vector3(255, 255, 255), 0.15),
+    new Light({ intensity: 0.15 }),
     new PointLight(20, 0.1),
     new Position(0, -5, 0)
   );
@@ -76,7 +73,7 @@ async function main(): Promise<void> {
     new TextureReference("MilkyWaySkybox")
   );
 
-  const planetTextures = [
+  const planets = [
     "Alpine",
     "Gaseous1",
     "Gaseous2",
@@ -95,14 +92,19 @@ async function main(): Promise<void> {
     "Volcanic",
   ];
 
+  const planetMaterials: Record<string, PhongMaterial> = {};
+
   await Promise.all(
-    planetTextures.map(async (planet) => {
+    planets.map(async (planet) => {
       const texture = await Texture.fetch(
         [import.meta.env.BASE_URL + `/web-assets/planets/${planet}.png`],
         planet
       );
 
       renderer.resourceManager.textures.add(planet, texture);
+      planetMaterials[planet] = new PhongMaterial({
+        diffuseMap: renderer.resourceManager.textures.get(planet) as Texture,
+      });
     })
   );
 
@@ -125,11 +127,7 @@ async function main(): Promise<void> {
     entityManager.createEntity(
       new MeshReference("Sphere"),
       new MaterialReference(
-        new PhongMaterial({
-          diffuseMap: renderer.resourceManager.textures.get(
-            planetTextures[Math.floor(random(0, planetTextures.length))]
-          ) as Texture,
-        })
+        planetMaterials[planets[Math.floor(random(0, planets.length))]]
       ),
       new Position(x, random(-30, 15), z),
       new Rotation(random(0, 360), random(0, 360), random(0, 360))
@@ -152,12 +150,10 @@ async function main(): Promise<void> {
     issRotationX += frame.deltaTime * 1e-3;
     issRotationY -= frame.deltaTime * 0.5e-3;
     issRotationZ += frame.deltaTime * 2e-3;
+    issRotation.setEulerAngles(issRotationX, issRotationY, issRotationZ);
 
     cameraPosition.x = 10 * Math.sin(frame.totalTime * 1e-4);
     cameraPosition.z = 10 * Math.cos(frame.totalTime * 1e-4);
-
-    issRotation.setEulerAngles(issRotationX, issRotationY, issRotationZ);
-
     lookAt(camera, new Vector3(0, 0, 0));
 
     renderer.render(camera);

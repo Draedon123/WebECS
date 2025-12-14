@@ -1,4 +1,4 @@
-import { EntityManager, type Entity } from "src/ecs";
+import { Component, EntityManager, type Entity } from "src/ecs";
 import { IndexArray, MeshReference, VertexArray, type Vertex } from "../meshes";
 import { type Renderer } from "../rendering";
 import { Children } from "src/ecs/Children";
@@ -175,7 +175,7 @@ class ResourceManager {
     return true;
   }
 
-  public spawnModel(modelKey: string): Entity {
+  public spawnModel(modelKey: string, ...components: Component[]): Entity {
     const model = this.getModel(modelKey);
 
     if (model === null) {
@@ -184,7 +184,7 @@ class ResourceManager {
 
     const entityManager = EntityManager.getInstance();
     const children = new Children();
-    const modelEntity = entityManager.createEntity(children);
+    const modelEntity = entityManager.createEntity(children, ...components);
 
     for (const object of model) {
       const meshReference = new MeshReference(object.meshReference);
